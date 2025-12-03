@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './components/Button';
@@ -10,6 +10,7 @@ import { Overview } from './components/dashboard/Overview';
 import { Templates } from './components/dashboard/Templates';
 import { Settings } from './components/dashboard/Settings';
 import { Billing } from './components/dashboard/Billing';
+import { SignIn } from './components/SignIn';
 
 // --- Types for App State ---
 interface AppState {
@@ -23,15 +24,15 @@ interface AppState {
 const Navbar: React.FC<{ 
   toggleLang: () => void; 
   lang: 'en' | 'np';
-  onLogin: () => void;
-}> = ({ toggleLang, lang, onLogin }) => {
+}> = ({ toggleLang, lang }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   
   return (
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display shadow-lg shadow-primary-500/30">S</div>
             <span className="font-display font-bold text-xl tracking-tight text-gray-900">Sewax</span>
           </div>
@@ -48,8 +49,8 @@ const Navbar: React.FC<{
               <span className="text-sm font-medium uppercase">{lang}</span>
             </button>
             
-            <Button variant="ghost" size="sm" onClick={onLogin}>Sign In</Button>
-            <Button variant="primary" size="sm" onClick={onLogin}>Get Started</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Sign In</Button>
+            <Button variant="primary" size="sm" onClick={() => navigate('/login')}>Get Started</Button>
           </div>
 
           <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
@@ -72,8 +73,8 @@ const Navbar: React.FC<{
               <a href="#templates" className="block text-gray-600 font-medium" onClick={() => setIsOpen(false)}>Templates</a>
               <a href="#pricing" className="block text-gray-600 font-medium" onClick={() => setIsOpen(false)}>Pricing</a>
               <div className="pt-4 flex flex-col gap-2">
-                 <Button variant="outline" className="w-full justify-center" onClick={onLogin}>Sign In</Button>
-                 <Button variant="primary" className="w-full justify-center" onClick={onLogin}>Get Started</Button>
+                 <Button variant="outline" className="w-full justify-center" onClick={() => { setIsOpen(false); navigate('/login'); }}>Sign In</Button>
+                 <Button variant="primary" className="w-full justify-center" onClick={() => { setIsOpen(false); navigate('/login'); }}>Get Started</Button>
               </div>
             </div>
           </motion.div>
@@ -107,11 +108,14 @@ const App: React.FC = () => {
               <Navbar 
                 toggleLang={() => setLanguage(prev => prev === 'en' ? 'np' : 'en')} 
                 lang={language}
-                onLogin={() => setIsAuthenticated(true)}
               />
               <LandingPage lang={language} />
               <Footer />
             </>
+          } />
+
+          <Route path="/login" element={
+            isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn onLogin={handleLogin} />
           } />
 
           {/* Protected Routes */}
@@ -128,11 +132,8 @@ const App: React.FC = () => {
                    </Routes>
                 </main>
               </div>
-            ) : <Navigate to="/" />
+            ) : <Navigate to="/login" />
           } />
-          
-          {/* Mock Login Redirect */}
-          <Route path="/login" element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} />} />
         </Routes>
       </div>
     </HashRouter>

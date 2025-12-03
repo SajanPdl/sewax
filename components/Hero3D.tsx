@@ -19,8 +19,9 @@ export const Hero3D: React.FC = () => {
   const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
 
   useEffect(() => {
-    // Pre-fetch Lottie data using a reliable public asset
-    fetch('https://assets5.lottiefiles.com/packages/lf20_qp1q7mct.json')
+    // Use a reliable GitHub Raw URL for the Lottie JSON to avoid 404/CORS issues
+    // This is a simple "website builder" style animation
+    fetch('https://raw.githubusercontent.com/airbnb/lottie-web/master/demo/gwd/data.json')
       .then(res => {
         if (!res.ok) throw new Error('Network response was not ok');
         return res.json();
@@ -28,7 +29,8 @@ export const Hero3D: React.FC = () => {
       .then(data => setLottieData(data))
       .catch(err => {
         console.warn("Failed to load fallback animation, using static fallback", err);
-        // We don't necessarily set error here, just don't set lottieData
+        // We don't necessarily set error here, just don't set lottieData to show static fallback
+        setHasError(true); 
       });
   }, []);
 
@@ -49,20 +51,11 @@ export const Hero3D: React.FC = () => {
   const yScroll = useTransform(scrollY, [0, 500], [0, -50]);
 
   // Determine if we should show fallback
-  // Logic: If user prefers reduced motion OR we encountered an error (simulated) 
+  // Logic: If user prefers reduced motion OR we encountered an error (simulated or real) 
   const showFallback = shouldReduceMotion || hasError;
 
-  if (showFallback) {
-    if (lottieData) {
-      return (
-        <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
-           <div className="w-[80%] max-w-[500px]">
-              <Lottie animationData={lottieData} loop={true} />
-           </div>
-        </div>
-      );
-    }
-    // Fallback if Lottie didn't load but we need fallback (e.g. 3D crashed)
+  if (showFallback && !lottieData) {
+     // Static fallback if even Lottie fails
     return (
       <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
          <div className="w-[300px] h-[300px] bg-gray-100 rounded-full flex items-center justify-center shadow-inner">
@@ -78,6 +71,16 @@ export const Hero3D: React.FC = () => {
          </div>
       </div>
     );
+  }
+
+  if (showFallback && lottieData) {
+      return (
+        <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
+           <div className="w-[80%] max-w-[500px]">
+              <Lottie animationData={lottieData} loop={true} />
+           </div>
+        </div>
+      );
   }
 
   return (
