@@ -1,10 +1,16 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import React, { useRef, useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import Lottie from 'lottie-react';
 
 export const Hero3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
+  const shouldReduceMotion = useReducedMotion();
   
+  // State for Lottie Fallback
+  const [lottieData, setLottieData] = useState<any>(null);
+  const [hasError, setHasError] = useState(false);
+
   // Mouse movement parallax
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -12,7 +18,19 @@ export const Hero3D: React.FC = () => {
   const mouseX = useSpring(x, { stiffness: 150, damping: 20 });
   const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
 
+  useEffect(() => {
+    // Pre-fetch Lottie data if we might need it (reduced motion or fallback)
+    // Using a reliable public Lottie for "Web Development/Building"
+    fetch('https://lottie.host/8b9196b0-1343-4698-b952-6a6c2f542c38/lO2I4j7h6x.json')
+      .then(res => res.json())
+      .then(data => setLottieData(data))
+      .catch(err => console.error("Failed to load fallback animation", err));
+  }, []);
+
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    // Skip calculations if reduced motion is on
+    if (shouldReduceMotion) return;
+    
     const { clientX, clientY } = event;
     const { innerWidth, innerHeight } = window;
     const xPct = (clientX / innerWidth) - 0.5;
@@ -25,6 +43,20 @@ export const Hero3D: React.FC = () => {
   const rotateScroll = useTransform(scrollY, [0, 500], [0, 15]);
   const yScroll = useTransform(scrollY, [0, 500], [0, -50]);
 
+  // Determine if we should show fallback
+  // Logic: If user prefers reduced motion OR we encountered an error (simulated) OR Lottie is loaded and we want to be safe
+  const showFallback = shouldReduceMotion || hasError;
+
+  if (showFallback && lottieData) {
+    return (
+      <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
+         <div className="w-[80%] max-w-[500px]">
+            <Lottie animationData={lottieData} loop={true} />
+         </div>
+      </div>
+    );
+  }
+
   return (
     <div 
       ref={containerRef}
@@ -34,12 +66,12 @@ export const Hero3D: React.FC = () => {
       {/* Abstract Background Elements */}
       <motion.div 
         className="absolute w-72 h-72 bg-primary-500/10 rounded-full blur-3xl -top-10 -left-10 mix-blend-multiply"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+        animate={shouldReduceMotion ? {} : { scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 8, repeat: Infinity }}
       />
       <motion.div 
         className="absolute w-72 h-72 bg-blue-500/10 rounded-full blur-3xl bottom-10 -right-10 mix-blend-multiply"
-        animate={{ scale: [1.2, 1, 1.2], opacity: [0.3, 0.6, 0.3] }}
+        animate={shouldReduceMotion ? {} : { scale: [1.2, 1, 1.2], opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 10, repeat: Infinity }}
       />
       
@@ -47,15 +79,16 @@ export const Hero3D: React.FC = () => {
       <motion.div
         className="relative w-[320px] md:w-[500px] h-[320px] md:h-[380px]"
         style={{ 
-          rotateX: mouseX, 
-          rotateY: mouseY, 
-          rotateZ: rotateScroll,
-          y: yScroll,
+          rotateX: shouldReduceMotion ? 0 : mouseX, 
+          rotateY: shouldReduceMotion ? 0 : mouseY, 
+          rotateZ: shouldReduceMotion ? 0 : rotateScroll,
+          y: shouldReduceMotion ? 0 : yScroll,
           transformStyle: 'preserve-3d' 
         }}
         initial={{ opacity: 0, scale: 0.8, y: 100 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
+        onError={() => setHasError(true)} // Basic error boundary simulation
       >
         {/* Base Layer - The "Platform" */}
         <div className="absolute inset-0 bg-white rounded-2xl shadow-2xl border border-gray-100/50 flex flex-col overflow-hidden transform translate-z-0 group hover:shadow-primary-500/20 transition-shadow duration-500">
@@ -90,7 +123,7 @@ export const Hero3D: React.FC = () => {
         <motion.div
           className="absolute -right-8 md:-right-16 top-16 bg-white p-4 rounded-xl shadow-xl border border-gray-100 z-20 w-52 backdrop-blur-md bg-white/90"
           style={{ zIndex: 20, translateZ: "40px" }}
-          animate={{ y: [0, -10, 0] }}
+          animate={shouldReduceMotion ? {} : { y: [0, -10, 0] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
           <div className="flex items-center gap-3">
@@ -108,7 +141,7 @@ export const Hero3D: React.FC = () => {
         <motion.div
           className="absolute -left-6 md:-left-12 -bottom-6 w-24 h-24 bg-gradient-to-br from-primary-600 to-red-500 rounded-2xl shadow-2xl shadow-primary-500/30 z-30 flex items-center justify-center border-4 border-white"
           style={{ translateZ: "60px" }}
-          animate={{ rotate: [0, 5, 0], y: [0, 15, 0] }}
+          animate={shouldReduceMotion ? {} : { rotate: [0, 5, 0], y: [0, 15, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
         >
            <svg className="w-12 h-12 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,7 +153,7 @@ export const Hero3D: React.FC = () => {
         <motion.div
             className="absolute -right-4 bottom-20 px-4 py-2 bg-gray-900 rounded-lg text-white text-xs font-mono shadow-xl z-25 flex items-center gap-2"
             style={{ translateZ: "30px" }}
-            animate={{ x: [0, 10, 0] }}
+            animate={shouldReduceMotion ? {} : { x: [0, 10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         >
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
