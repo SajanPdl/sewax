@@ -19,12 +19,17 @@ export const Hero3D: React.FC = () => {
   const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
 
   useEffect(() => {
-    // Pre-fetch Lottie data if we might need it (reduced motion or fallback)
-    // Using a reliable public Lottie for "Web Development/Building"
-    fetch('https://lottie.host/8b9196b0-1343-4698-b952-6a6c2f542c38/lO2I4j7h6x.json')
-      .then(res => res.json())
+    // Pre-fetch Lottie data using a reliable public asset
+    fetch('https://assets5.lottiefiles.com/packages/lf20_qp1q7mct.json')
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
       .then(data => setLottieData(data))
-      .catch(err => console.error("Failed to load fallback animation", err));
+      .catch(err => {
+        console.warn("Failed to load fallback animation, using static fallback", err);
+        // We don't necessarily set error here, just don't set lottieData
+      });
   }, []);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -44,14 +49,32 @@ export const Hero3D: React.FC = () => {
   const yScroll = useTransform(scrollY, [0, 500], [0, -50]);
 
   // Determine if we should show fallback
-  // Logic: If user prefers reduced motion OR we encountered an error (simulated) OR Lottie is loaded and we want to be safe
+  // Logic: If user prefers reduced motion OR we encountered an error (simulated) 
   const showFallback = shouldReduceMotion || hasError;
 
-  if (showFallback && lottieData) {
+  if (showFallback) {
+    if (lottieData) {
+      return (
+        <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
+           <div className="w-[80%] max-w-[500px]">
+              <Lottie animationData={lottieData} loop={true} />
+           </div>
+        </div>
+      );
+    }
+    // Fallback if Lottie didn't load but we need fallback (e.g. 3D crashed)
     return (
       <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
-         <div className="w-[80%] max-w-[500px]">
-            <Lottie animationData={lottieData} loop={true} />
+         <div className="w-[300px] h-[300px] bg-gray-100 rounded-full flex items-center justify-center shadow-inner">
+             <div className="text-center p-6">
+                <div className="w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                  </svg>
+                </div>
+                <h3 className="font-bold text-gray-900">Build Your Site</h3>
+                <p className="text-sm text-gray-500 mt-2">Interactive 3D preview unavailable.</p>
+             </div>
          </div>
       </div>
     );
