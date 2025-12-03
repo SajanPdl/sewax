@@ -43,7 +43,7 @@ const STEPS = [
 
 // --- Mock UI Components ---
 
-const MockWindow = ({ children, title = "Sewax Dashboard" }: { children: React.ReactNode, title?: string }) => (
+const MockWindow = ({ children, title = "Sewax Dashboard" }: { children?: React.ReactNode, title?: string }) => (
   <div className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-full max-w-md mx-auto transform transition-transform hover:scale-[1.02] duration-500">
     <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-2">
       <div className="flex gap-1.5">
