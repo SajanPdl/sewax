@@ -9,12 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.9.6",
-    "recharts": "^3.5.1",
-    "react": "^19.2.0",
-    "lucide-react": "^0.555.0",
-    "framer-motion": "^12.23.25"
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-router-dom": "6.22.3",
+    "recharts": "2.12.3",
+    "lucide-react": "0.358.0",
+    "framer-motion": "11.0.14",
+    "lottie-react": "2.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
