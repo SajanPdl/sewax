@@ -20,7 +20,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
     try {
       if (isSignUp) {
         // Sign Up Flow
-        const { error } = await supabase.auth.signUp({
+        const { error } = await (supabase.auth as any).signUp({
           email,
           password,
           options: {
@@ -34,7 +34,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
         alert('Account created! Please check your email to verify.');
       } else {
         // Sign In Flow
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error } = await (supabase.auth as any).signInWithPassword({
           email,
           password,
         });

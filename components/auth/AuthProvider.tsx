@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase/client';
-import { User, Session } from '@supabase/supabase-js';
 import { UserRole } from '../dashboard/RBACWrapper';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: any | null;
+  session: any | null;
   tenant: any | null; // The active tenant
   role: UserRole;
   loading: boolean;
@@ -22,15 +21,15 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<any | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [tenant, setTenant] = useState<any | null>(null);
   const [role, setRole] = useState<UserRole>('Viewer');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // 1. Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    (supabase.auth as any).getSession().then(({ data: { session } }: any) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchTenant(session.user.id);
@@ -38,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // 2. Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) fetchTenant(session.user.id);
@@ -76,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await (supabase.auth as any).signOut();
   };
 
   return (
