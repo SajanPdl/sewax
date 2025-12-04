@@ -5,12 +5,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './components/Button';
 import { Footer } from './components/Footer';
 import { LandingPage } from './components/LandingPage';
+import { Pricing } from './components/Pricing';
+import { TemplatesPage } from './components/TemplatesPage';
+import { Help } from './components/Help';
+import { Privacy } from './components/Privacy';
+import { Terms } from './components/Terms';
+import { Status } from './components/Status';
+import { Signup } from './components/Signup';
+import { Onboard } from './components/Onboard';
+import { SignInNew } from './components/AuthPage';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { Overview } from './components/dashboard/Overview';
 import { Templates } from './components/dashboard/Templates';
 import { Settings } from './components/dashboard/Settings';
 import { Billing } from './components/dashboard/Billing';
 import { SignIn } from './components/SignIn';
+import { BillingDashboard } from './components/dashboard/BillingPage';
+import { AccountTeamPage } from './components/dashboard/AccountTeamPage';
+import { SiteManagementPage } from './components/dashboard/SiteManagementPage';
+import { AdminPanel } from './components/admin/AdminPanel';
+import { OnboardWizard } from './components/OnboardWizard';
 
 // --- Types for App State ---
 interface AppState {
@@ -115,10 +129,44 @@ const App: React.FC = () => {
           } />
 
           <Route path="/login" element={
-            isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn onLogin={handleLogin} />
+            isAuthenticated ? <Navigate to="/app" /> : <SignInNew onLogin={handleLogin} />
+          } />
+
+          <Route path="/signup" element={
+            isAuthenticated ? <Navigate to="/app" /> : <SignInNew onLogin={handleLogin} />
+          } />
+
+          <Route path="/magic-link" element={
+            isAuthenticated ? <Navigate to="/app" /> : <SignInNew onLogin={handleLogin} />
+          } />
+
+          <Route path="/forgot-password" element={
+            isAuthenticated ? <Navigate to="/app" /> : <SignInNew onLogin={handleLogin} />
           } />
 
           {/* Protected Routes */}
+          <Route path="/pricing" element={
+            <>
+              <Navbar toggleLang={() => setLanguage(prev => prev === 'en' ? 'np' : 'en')} lang={language} />
+              <Pricing />
+              <Footer />
+            </>
+          } />
+
+          <Route path="/templates" element={
+            <>
+              <Navbar toggleLang={() => setLanguage(prev => prev === 'en' ? 'np' : 'en')} lang={language} />
+              <TemplatesPage />
+              <Footer />
+            </>
+          } />
+
+          <Route path="/help" element={<Help />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/status" element={<Status />} />
+          <Route path="/onboard" element={<OnboardWizard />} />
+
           <Route path="/dashboard/*" element={
             isAuthenticated ? (
               <div className="flex min-h-screen bg-gray-50">
@@ -132,6 +180,31 @@ const App: React.FC = () => {
                    </Routes>
                 </main>
               </div>
+            ) : <Navigate to="/login" />
+          } />
+
+          <Route path="/app/*" element={
+            isAuthenticated ? (
+              <div className="flex min-h-screen bg-gray-50">
+                <Sidebar onLogout={handleLogout} />
+                <main className="flex-1 lg:ml-64">
+                   <Routes>
+                      <Route path="/" element={<Overview />} />
+                      <Route path="/sites" element={<SiteManagementPage />} />
+                      <Route path="/billing" element={<BillingDashboard />} />
+                      <Route path="/account" element={<AccountTeamPage />} />
+                      <Route path="/team" element={<AccountTeamPage />} />
+                      <Route path="/templates" element={<Templates />} />
+                      <Route path="/settings" element={<Settings />} />
+                   </Routes>
+                </main>
+              </div>
+            ) : <Navigate to="/login" />
+          } />
+
+          <Route path="/admin/*" element={
+            isAuthenticated ? (
+              <AdminPanel />
             ) : <Navigate to="/login" />
           } />
         </Routes>

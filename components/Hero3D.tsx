@@ -19,19 +19,8 @@ export const Hero3D: React.FC = () => {
   const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
 
   useEffect(() => {
-    // Use a reliable GitHub Raw URL for the Lottie JSON to avoid 404/CORS issues
-    // This is a simple "website builder" style animation
-    fetch('https://raw.githubusercontent.com/airbnb/lottie-web/master/demo/gwd/data.json')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(data => setLottieData(data))
-      .catch(err => {
-        console.warn("Failed to load fallback animation, using static fallback", err);
-        // We don't necessarily set error here, just don't set lottieData to show static fallback
-        setHasError(true); 
-      });
+    // Skip Lottie loading in development - use static fallback
+    setHasError(true);
   }, []);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
