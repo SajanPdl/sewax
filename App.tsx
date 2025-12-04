@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
@@ -20,17 +21,12 @@ import { Templates } from './components/dashboard/Templates';
 import { Settings } from './components/dashboard/Settings';
 import { Billing } from './components/dashboard/Billing';
 import { SignIn } from './components/SignIn';
-import { BillingDashboard } from './components/dashboard/BillingPage';
-import { AccountTeamPage } from './components/dashboard/AccountTeamPage';
-import { SiteManagementPage } from './components/dashboard/SiteManagementPage';
-import { AdminPanel } from './components/admin/AdminPanel';
-import { OnboardWizard } from './components/OnboardWizard';
 
 // --- Types for App State ---
 interface AppState {
   isAuthenticated: boolean;
   language: 'en' | 'np';
-  user: { name: string; email: string; company?: string } | null;
+  user: { name: string; email: string; company?: string; role: UserRole } | null;
 }
 
 // --- Layout Components ---
@@ -103,6 +99,8 @@ const Navbar: React.FC<{
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [language, setLanguage] = useState<'en' | 'np'>('en');
+  // Default role for demo is Owner
+  const [userRole, setUserRole] = useState<UserRole>('Owner');
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -145,38 +143,36 @@ const App: React.FC = () => {
           } />
 
           {/* Protected Routes */}
-          <Route path="/pricing" element={
-            <>
-              <Navbar toggleLang={() => setLanguage(prev => prev === 'en' ? 'np' : 'en')} lang={language} />
-              <Pricing />
-              <Footer />
-            </>
-          } />
-
-          <Route path="/templates" element={
-            <>
-              <Navbar toggleLang={() => setLanguage(prev => prev === 'en' ? 'np' : 'en')} lang={language} />
-              <TemplatesPage />
-              <Footer />
-            </>
-          } />
-
-          <Route path="/help" element={<Help />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/status" element={<Status />} />
-          <Route path="/onboard" element={<OnboardWizard />} />
-
           <Route path="/dashboard/*" element={
             isAuthenticated ? (
               <div className="flex min-h-screen bg-gray-50">
-                <Sidebar onLogout={handleLogout} />
-                <main className="flex-1 lg:ml-64">
+                <Routes>
+                  <Route path="editor" element={null} />
+                  <Route path="*" element={
+                    <Sidebar 
+                      onLogout={handleLogout} 
+                      role={userRole} 
+                      setRole={setUserRole} // Passing setter for demo purposes
+                    />
+                  } />
+                </Routes>
+
+                <main className={`flex-1 transition-all duration-300`}>
                    <Routes>
-                      <Route path="/" element={<Overview />} />
+                      <Route path="/" element={<Overview role={userRole} />} />
+                      <Route path="/sites" element={<SitesList />} />
+                      <Route path="/editor" element={<EditorMock />} />
+                      <Route path="/analytics" element={<Analytics />} />
                       <Route path="/templates" element={<Templates />} />
+                      <Route path="/team" element={<Team role={userRole} />} />
+                      <Route path="/integrations" element={<Integrations />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/billing" element={<Billing />} />
+                      
+                      {/* Commerce Routes */}
+                      <Route path="/pos" element={<POS />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/orders" element={<Orders />} />
                    </Routes>
                 </main>
               </div>
