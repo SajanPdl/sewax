@@ -55,11 +55,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchTenant = async (userId: string) => {
     try {
       // Fetch the first tenant user belongs to (One Store model)
-      const { data, error } = await supabase
+      const { data: memberData, error } = await supabase
         .from('tenant_members')
         .select('role, tenants(*)')
         .eq('user_id', userId)
         .single();
+      
+      // Explicitly cast to any to handle joined data types which TS may not infer correctly from Supabase types
+      const data = memberData as any;
 
       if (data && data.tenants) {
         setTenant(data.tenants);
