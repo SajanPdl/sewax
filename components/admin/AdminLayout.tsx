@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Building2, CreditCard, Shield, 
   Palette, Globe, Database, Server, Headphones, FileText, 
@@ -8,9 +8,13 @@ import {
   Flag, Lock, HardDrive, RefreshCw, Layers
 } from 'lucide-react';
 
-export const AdminLayout: React.FC = () => {
+interface AdminLayoutProps {
+  children?: React.ReactNode;
+}
+
+export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const menuGroups = [
     {
@@ -95,7 +99,7 @@ export const AdminLayout: React.FC = () => {
                       return (
                         <button
                           key={item.path}
-                          onClick={() => navigate(item.path)}
+                          onClick={() => history.push(item.path)}
                           className={`w-full flex items-center gap-3 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                             isActive 
                               ? 'bg-primary-900/20 text-primary-400 border border-primary-900/30' 
@@ -123,7 +127,7 @@ export const AdminLayout: React.FC = () => {
                  <p className="text-xs text-neutral-500 truncate">System Owner</p>
               </div>
               <button 
-                onClick={() => navigate('/admin/login')}
+                onClick={() => history.push('/admin/login')}
                 className="text-neutral-500 hover:text-white transition-colors"
               >
                  <LogOut className="w-4 h-4" />
@@ -154,7 +158,7 @@ export const AdminLayout: React.FC = () => {
 
          {/* Page Content */}
          <div className="p-8">
-            <Outlet />
+            {children}
          </div>
       </main>
     </div>

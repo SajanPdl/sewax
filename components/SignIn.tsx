@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { Button } from './Button';
 import { ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const history = useHistory();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +47,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
            // Explicitly navigate to dashboard on success
            // The App.tsx AuthProvider will also pick up the session change, 
            // but explicit navigation makes the UI feel snappier.
-           navigate('/dashboard');
+           history.push('/dashboard');
         }
       }
     } catch (err: any) {
@@ -60,7 +61,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
-          <div className="flex items-center gap-2 mb-6 justify-center cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2 mb-6 justify-center cursor-pointer" onClick={() => history.push('/')}>
              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold">S</div>
              <span className="font-bold text-xl text-gray-900">Sewax</span>
           </div>

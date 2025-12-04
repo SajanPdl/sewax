@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect, useHistory, useRouteMatch } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { Overview } from './components/dashboard/Overview';
@@ -11,7 +12,7 @@ import { SitesList } from './components/dashboard/SitesList';
 import { Analytics } from './components/dashboard/Analytics';
 import { Team } from './components/dashboard/Team';
 import { Integrations } from './components/dashboard/Integrations';
-import { EditorMock } from './components/dashboard/EditorMock';
+import { WebsiteBuilder } from './components/dashboard/WebsiteBuilder';
 import { LandingPage } from './components/LandingPage';
 import { Footer } from './components/Footer';
 
@@ -32,29 +33,26 @@ import { SupportTickets } from './components/admin/SupportTickets';
 import { AuditLogs } from './components/admin/AuditLogs';
 
 // Navbar Component (Internal)
-import { Menu, X, Globe } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './components/Button';
-import { useNavigate } from 'react-router-dom';
 
 const Navbar: React.FC<{ 
   toggleLang: () => void; 
   lang: 'en' | 'np';
 }> = ({ toggleLang, lang }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const navigate = useNavigate();
+  const history = useHistory();
   
   return (
     <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => history.push('/')}>
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display shadow-lg">S</div>
             <span className="font-bold text-xl text-gray-900">Sewax</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Sign In</Button>
-            <Button variant="primary" size="sm" onClick={() => navigate('/login')}>Get Started</Button>
+            <Button variant="ghost" size="sm" onClick={() => history.push('/login')}>Sign In</Button>
+            <Button variant="primary" size="sm" onClick={() => history.push('/login')}>Get Started</Button>
           </div>
         </div>
       </div>
@@ -66,7 +64,7 @@ const Navbar: React.FC<{
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
-  if (!session) return <Navigate to="/login" />;
+  if (!session) return <Redirect to="/login" />;
   return <>{children}</>;
 };
 
@@ -74,32 +72,34 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
-  if (session) return <Navigate to="/dashboard" />;
+  if (session) return <Redirect to="/dashboard" />;
   return <>{children}</>;
 };
 
 // Main Layout Wrapper
 const DashboardLayout = () => {
   const { role, signOut } = useAuth();
+  const { path } = useRouteMatch();
   
   return (
     <div className="flex min-h-screen bg-gray-50">
        <Sidebar onLogout={signOut} role={role} setRole={() => {}} />
        <main className="flex-1 lg:ml-64 transition-all duration-300">
-          <Routes>
-              <Route path="/" element={<Overview role={role} />} />
-              <Route path="/sites" element={<SitesList />} />
-              <Route path="/editor" element={<EditorMock />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/templates" element={<Templates />} />
-              <Route path="/team" element={<Team role={role} />} />
-              <Route path="/integrations" element={<Integrations />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/pos" element={<POS />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/orders" element={<Orders />} />
-          </Routes>
+          <Switch>
+              <Route exact path={path} render={() => <Overview role={role} />} />
+              <Route path={`${path}/sites`} component={SitesList} />
+              <Route path={`${path}/builder`} component={WebsiteBuilder} />
+              <Route path={`${path}/editor`} component={WebsiteBuilder} /> {/* Alias for old link */}
+              <Route path={`${path}/analytics`} component={Analytics} />
+              <Route path={`${path}/templates`} component={Templates} />
+              <Route path={`${path}/team`} render={() => <Team role={role} />} />
+              <Route path={`${path}/integrations`} component={Integrations} />
+              <Route path={`${path}/settings`} component={Settings} />
+              <Route path={`${path}/billing`} component={Billing} />
+              <Route path={`${path}/pos`} component={POS} />
+              <Route path={`${path}/products`} component={Products} />
+              <Route path={`${path}/orders`} component={Orders} />
+          </Switch>
        </main>
     </div>
   );
@@ -111,40 +111,44 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <HashRouter>
-        <Routes>
-          <Route path="/" element={
+        <Switch>
+          <Route exact path="/" render={() => (
             <>
               <Navbar toggleLang={() => setLang(l => l==='en'?'np':'en')} lang={lang} />
               <LandingPage lang={lang} />
               <Footer />
             </>
-          } />
+          )} />
           
-          <Route path="/login" element={
+          <Route path="/login" render={() => (
             <PublicOnlyRoute>
               <SignIn />
             </PublicOnlyRoute>
-          } />
+          )} />
           
-          <Route path="/dashboard/*" element={
+          <Route path="/dashboard" render={() => (
             <ProtectedRoute>
               <DashboardLayout />
             </ProtectedRoute>
-          } />
+          )} />
 
           {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminLayout />}>
-             <Route index element={<Navigate to="dashboard" />} />
-             <Route path="dashboard" element={<AdminDashboard />} />
-             <Route path="tenants" element={<TenantManager />} />
-             <Route path="users" element={<UserManager />} />
-             <Route path="templates" element={<TemplateManager />} />
-             <Route path="billing" element={<BillingOverview />} />
-             <Route path="support" element={<SupportTickets />} />
-             <Route path="audit" element={<AuditLogs />} />
-          </Route>
-        </Routes>
+          <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin" render={({ match }) => (
+             <AdminLayout>
+                <Switch>
+                   <Route exact path={match.path} render={() => <Redirect to={`${match.path}/dashboard`} />} />
+                   <Route path={`${match.path}/dashboard`} component={AdminDashboard} />
+                   <Route path={`${match.path}/tenants`} component={TenantManager} />
+                   <Route path={`${match.path}/users`} component={UserManager} />
+                   <Route path={`${match.path}/templates`} component={TemplateManager} />
+                   <Route path={`${match.path}/billing`} component={BillingOverview} />
+                   <Route path={`${match.path}/support`} component={SupportTickets} />
+                   <Route path={`${match.path}/audit`} component={AuditLogs} />
+                </Switch>
+             </AdminLayout>
+          )} />
+        </Switch>
       </HashRouter>
     </AuthProvider>
   );

@@ -1,16 +1,36 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { TEMPLATES } from '../../constants';
-import { Search, Filter, Layout } from 'lucide-react';
+import { Search, Layout, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase/client';
 
 export const Templates: React.FC = () => {
   const [filter, setFilter] = useState('All');
-  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS', 'Hospitality'];
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS'];
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      const { data, error } = await supabase
+        .from('gallery_templates')
+        .select('*')
+        .eq('is_active', true);
+      
+      if (data) setTemplates(data);
+      setLoading(false);
+    };
+    fetchTemplates();
+  }, []);
 
   const filteredTemplates = filter === 'All' 
-    ? TEMPLATES 
-    : TEMPLATES.filter(t => t.category === filter);
+    ? templates 
+    : templates.filter(t => t.category === filter);
+
+  if (loading) {
+    return <div className="flex h-96 items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary-500" /></div>;
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -56,10 +76,9 @@ export const Templates: React.FC = () => {
             key={template.id} 
             className="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-xl hover:border-primary-100 transition-all duration-300"
           >
-            <div className="relative h-48 overflow-hidden">
-               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
+            <div className="relative h-48 overflow-hidden bg-gray-100">
                <img 
-                 src={template.image} 
+                 src={template.image_url} 
                  alt={template.name} 
                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                />
@@ -81,14 +100,15 @@ export const Templates: React.FC = () => {
           </motion.div>
         ))}
         
-        {/* 'Coming Soon' Placeholder */}
-        <div className="border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50">
-           <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-             <Layout className="w-6 h-6 text-gray-400" />
+        {filteredTemplates.length === 0 && (
+           <div className="col-span-full border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Layout className="w-6 h-6 text-gray-400" />
+              </div>
+              <h3 className="font-bold text-gray-900">No templates found</h3>
+              <p className="text-sm text-gray-500 mt-1 max-w-xs">We add new Nepali-focused templates every week.</p>
            </div>
-           <h3 className="font-bold text-gray-900">More coming soon</h3>
-           <p className="text-sm text-gray-500 mt-1 max-w-xs">We add new Nepali-focused templates every week.</p>
-        </div>
+        )}
       </div>
     </div>
   );

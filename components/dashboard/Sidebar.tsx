@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useHistory } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Settings, 
@@ -19,6 +19,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { UserRole, hasPermission } from './RBACWrapper';
+import { useAuth } from '../auth/AuthProvider';
 
 interface SidebarProps {
   onLogout: () => void;
@@ -26,9 +27,10 @@ interface SidebarProps {
   setRole: (role: UserRole) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role, setRole }) => {
-  const navigate = useNavigate();
+export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role }) => {
+  const history = useHistory();
   const location = useLocation();
+  const { user, tenant } = useAuth();
 
   const menuGroups = [
     {
@@ -43,8 +45,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role, setRole }) => 
     {
       label: "Online Store",
       items: [
-        { icon: Globe, label: 'Online Store', path: '/dashboard/sites', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-        { icon: PenTool, label: 'Editor / CMS', path: '/dashboard/editor', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+        { icon: Globe, label: 'All Sites', path: '/dashboard/sites', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
+        { icon: PenTool, label: 'Website Builder', path: '/dashboard/builder', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
         { icon: BarChart2, label: 'Analytics', path: '/dashboard/analytics', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
       ]
     },
@@ -84,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role, setRole }) => 
                   return (
                     <button
                       key={item.path}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => history.push(item.path)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
                         isActive 
                         ? 'bg-primary-50 text-primary-700' 
@@ -105,25 +107,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role, setRole }) => 
         })}
       </div>
       
-      {/* Footer / User Profile & Role Switcher */}
+      {/* Footer / User Profile */}
       <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-         <div className="mb-4 px-2">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Demo Role Switcher</label>
-            <div className="relative">
-              <Shield className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-              <select 
-                value={role} 
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                className="w-full pl-7 pr-2 py-1.5 bg-white border border-gray-200 rounded text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-primary-500"
-              >
-                <option value="Owner">Owner</option>
-                <option value="Admin">Admin</option>
-                <option value="Editor">Editor</option>
-                <option value="Viewer">Viewer</option>
-              </select>
-            </div>
-         </div>
-
          <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg mb-2 transition-colors">
             <HelpCircle className="w-4 h-4 text-gray-400" />
             Help & Support
@@ -131,12 +116,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role, setRole }) => 
 
         <div className="flex items-center gap-3 px-3 py-2 mt-2 border-t border-gray-200 pt-4">
           <div className="relative">
-             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">SK</div>
+             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
+             </div>
              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
           </div>
           <div className="flex-1 overflow-hidden text-left">
-            <p className="text-sm font-medium text-gray-900 truncate">Sudeep K.</p>
-            <p className="text-xs text-gray-500 truncate">{role} • Pro Plan</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{tenant?.name || 'My Store'}</p>
+            <p className="text-xs text-gray-500 truncate capitalize">{role}</p>
           </div>
           <button 
             onClick={onLogout}

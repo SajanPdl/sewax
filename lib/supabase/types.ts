@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -111,12 +112,79 @@ export interface Database {
           invited_by?: string | null
         }
       }
-      products: {
+      gallery_templates: {
+        Row: {
+          id: string
+          name: string
+          category: string | null
+          image_url: string | null
+          description: string | null
+          config: Json | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          name: string
+          category?: string | null
+          image_url?: string | null
+          description?: string | null
+          config?: Json | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          category?: string | null
+          image_url?: string | null
+          description?: string | null
+          config?: Json | null
+          is_active?: boolean
+          created_at?: string
+        }
+      }
+      pages: {
         Row: {
           id: string
           tenant_id: string
           title: string
           slug: string
+          content: Json | null
+          is_published: boolean
+          published_at: string | null
+          seo_title: string | null
+          seo_description: string | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          tenant_id: string
+          title: string
+          slug: string
+          content?: Json | null
+          is_published?: boolean
+          published_at?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          title?: string
+          slug?: string
+          content?: Json | null
+          is_published?: boolean
+          published_at?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          updated_at?: string | null
+        }
+      }
+      products: {
+        Row: {
+          id: string
+          tenant_id: string
+          title: string
+          slug: string | null
           description: string | null
           price: number
           compare_at_price: number | null
@@ -139,7 +207,7 @@ export interface Database {
         Insert: {
           tenant_id: string
           title: string
-          slug: string
+          slug?: string | null
           description?: string | null
           price?: number
           compare_at_price?: number | null
@@ -161,7 +229,7 @@ export interface Database {
         }
         Update: {
           title?: string
-          slug?: string
+          slug?: string | null
           description?: string | null
           price?: number
           compare_at_price?: number | null
@@ -293,43 +361,6 @@ export interface Database {
         Update: {
           quantity?: number
           price?: number
-        }
-      }
-      pages: {
-        Row: {
-          id: string
-          tenant_id: string
-          title: string
-          slug: string
-          content: Json | null
-          is_published: boolean
-          published_at: string | null
-          seo_title: string | null
-          seo_description: string | null
-          created_at: string
-          updated_at: string | null
-        }
-        Insert: {
-          tenant_id: string
-          title: string
-          slug: string
-          content?: Json | null
-          is_published?: boolean
-          published_at?: string | null
-          seo_title?: string | null
-          seo_description?: string | null
-          created_at?: string
-          updated_at?: string | null
-        }
-        Update: {
-          title?: string
-          slug?: string
-          content?: Json | null
-          is_published?: boolean
-          published_at?: string | null
-          seo_title?: string | null
-          seo_description?: string | null
-          updated_at?: string | null
         }
       }
       support_tickets: {
