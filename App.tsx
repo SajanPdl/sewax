@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Menu, X, Globe } from 'lucide-react';
@@ -11,12 +12,31 @@ import { Templates } from './components/dashboard/Templates';
 import { Settings } from './components/dashboard/Settings';
 import { Billing } from './components/dashboard/Billing';
 import { SignIn } from './components/SignIn';
+import { SitesList } from './components/dashboard/SitesList';
+import { Analytics } from './components/dashboard/Analytics';
+import { Team } from './components/dashboard/Team';
+import { Integrations } from './components/dashboard/Integrations';
+import { EditorMock } from './components/dashboard/EditorMock';
+import { UserRole } from './components/dashboard/RBACWrapper';
+
+// Commerce Imports
+import { POS } from './components/dashboard/POS';
+import { Products } from './components/dashboard/Products';
+import { Orders } from './components/dashboard/Orders';
+
+
+// Admin Imports
+import { AdminLogin } from './components/admin/AdminLogin';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { TenantManager } from './components/admin/TenantManager';
+import { TemplateManager } from './components/admin/TemplateManager';
 
 // --- Types for App State ---
 interface AppState {
   isAuthenticated: boolean;
   language: 'en' | 'np';
-  user: { name: string; email: string; company?: string } | null;
+  user: { name: string; email: string; company?: string; role: UserRole } | null;
 }
 
 // --- Layout Components ---
@@ -89,6 +109,8 @@ const Navbar: React.FC<{
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [language, setLanguage] = useState<'en' | 'np'>('en');
+  // Default role for demo is Owner
+  const [userRole, setUserRole] = useState<UserRole>('Owner');
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -118,17 +140,48 @@ const App: React.FC = () => {
             isAuthenticated ? <Navigate to="/dashboard" /> : <SignIn onLogin={handleLogin} />
           } />
 
-          {/* Protected Routes */}
+          {/* Admin Routes (Standalone) */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+             <Route index element={<Navigate to="dashboard" />} />
+             <Route path="dashboard" element={<AdminDashboard />} />
+             <Route path="tenants" element={<TenantManager />} />
+             <Route path="templates" element={<TemplateManager />} />
+             {/* Fallback for unimplemented admin routes */}
+             <Route path="*" element={<div className="text-white p-4">Module under construction</div>} />
+          </Route>
+
+          {/* User Dashboard Routes */}
           <Route path="/dashboard/*" element={
             isAuthenticated ? (
               <div className="flex min-h-screen bg-gray-50">
-                <Sidebar onLogout={handleLogout} />
-                <main className="flex-1 lg:ml-64">
+                <Routes>
+                  <Route path="editor" element={null} />
+                  <Route path="*" element={
+                    <Sidebar 
+                      onLogout={handleLogout} 
+                      role={userRole} 
+                      setRole={setUserRole} // Passing setter for demo purposes
+                    />
+                  } />
+                </Routes>
+
+                <main className={`flex-1 transition-all duration-300`}>
                    <Routes>
-                      <Route path="/" element={<Overview />} />
+                      <Route path="/" element={<Overview role={userRole} />} />
+                      <Route path="/sites" element={<SitesList />} />
+                      <Route path="/editor" element={<EditorMock />} />
+                      <Route path="/analytics" element={<Analytics />} />
                       <Route path="/templates" element={<Templates />} />
+                      <Route path="/team" element={<Team role={userRole} />} />
+                      <Route path="/integrations" element={<Integrations />} />
                       <Route path="/settings" element={<Settings />} />
                       <Route path="/billing" element={<Billing />} />
+                      
+                      {/* Commerce Routes */}
+                      <Route path="/pos" element={<POS />} />
+                      <Route path="/products" element={<Products />} />
+                      <Route path="/orders" element={<Orders />} />
                    </Routes>
                 </main>
               </div>
