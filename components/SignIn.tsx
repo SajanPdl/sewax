@@ -32,17 +32,26 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
         });
         if (error) throw error;
         alert('Account created! Please check your email to verify.');
+        setIsSignUp(false); // Switch to sign in view
       } else {
         // Sign In Flow
-        const { error } = await (supabase.auth as any).signInWithPassword({
+        const { data, error } = await (supabase.auth as any).signInWithPassword({
           email,
           password,
         });
+        
         if (error) throw error;
-        // Navigation is handled by App.tsx observing auth state
+        
+        if (data.session) {
+           // Explicitly navigate to dashboard on success
+           // The App.tsx AuthProvider will also pick up the session change, 
+           // but explicit navigation makes the UI feel snappier.
+           navigate('/dashboard');
+        }
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error("Login error:", err);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +60,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
        <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
-          <div className="flex items-center gap-2 mb-6 justify-center">
+          <div className="flex items-center gap-2 mb-6 justify-center cursor-pointer" onClick={() => navigate('/')}>
              <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold">S</div>
              <span className="font-bold text-xl text-gray-900">Sewax</span>
           </div>

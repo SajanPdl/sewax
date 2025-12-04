@@ -70,6 +70,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Public Only Route (Redirects to Dashboard if logged in)
+const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = useAuth();
+  if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
+  if (session) return <Navigate to="/dashboard" />;
+  return <>{children}</>;
+};
+
 // Main Layout Wrapper
 const DashboardLayout = () => {
   const { role, signOut } = useAuth();
@@ -112,7 +120,11 @@ const App: React.FC = () => {
             </>
           } />
           
-          <Route path="/login" element={<SignIn />} />
+          <Route path="/login" element={
+            <PublicOnlyRoute>
+              <SignIn />
+            </PublicOnlyRoute>
+          } />
           
           <Route path="/dashboard/*" element={
             <ProtectedRoute>

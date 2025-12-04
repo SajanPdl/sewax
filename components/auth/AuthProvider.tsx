@@ -66,10 +66,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data && data.tenants) {
         setTenant(data.tenants);
         setRole(data.role as UserRole);
+      } else {
+        // Handle case where user is authenticated but tenant creation (trigger) might have failed or is pending
+        console.warn("User authenticated but no tenant found.");
+        // We could technically redirect to an 'Onboarding' page here if we had one
       }
     } catch (e) {
       console.error("Error fetching tenant", e);
     } finally {
+      // ALWAYS stop loading, even if tenant fetch fails
       setLoading(false);
     }
   };
