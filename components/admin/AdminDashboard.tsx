@@ -4,7 +4,7 @@ import {
   Users, Building, DollarSign, Activity, ArrowUp, ArrowDown, 
   Server, AlertOctagon, FileWarning, Clock
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export const AdminDashboard: React.FC = () => {
   const serverStats = [

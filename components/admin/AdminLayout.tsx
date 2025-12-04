@@ -4,28 +4,64 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Building2, CreditCard, Shield, 
   Palette, Globe, Database, Server, Headphones, FileText, 
-  BarChart3, Settings, LogOut, Search, Bell, Terminal
+  BarChart3, Settings, LogOut, Search, Bell, Terminal,
+  Flag, Lock, HardDrive, RefreshCw, Layers
 } from 'lucide-react';
 
 export const AdminLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
-    { icon: Building2, label: 'Tenants', path: '/admin/tenants' },
-    { icon: Users, label: 'User Mgmt', path: '/admin/users' },
-    { icon: Shield, label: 'Roles & RBAC', path: '/admin/roles' },
-    { icon: CreditCard, label: 'Billing & Plans', path: '/admin/billing' },
-    { icon: Palette, label: 'Templates', path: '/admin/templates' },
-    { icon: Globe, label: 'Sites & Domains', path: '/admin/sites' },
-    { icon: Server, label: 'Storage & CDN', path: '/admin/storage' },
-    { icon: FileText, label: 'CMS Global', path: '/admin/cms' },
-    { icon: Headphones, label: 'Support Tickets', path: '/admin/support' },
-    { icon: Database, label: 'Audit Logs', path: '/admin/audit' },
-    { icon: BarChart3, label: 'Growth', path: '/admin/growth' },
-    { icon: Terminal, label: 'API & Sys', path: '/admin/api' },
-    { icon: Settings, label: 'Settings', path: '/admin/settings' },
+  const menuGroups = [
+    {
+      title: "Overview",
+      items: [
+        { icon: LayoutDashboard, label: 'Dashboard', path: '/admin/dashboard' },
+        { icon: BarChart3, label: 'Analytics & Reports', path: '/admin/reports' },
+        { icon: Activity, label: 'System Health', path: '/admin/health' },
+      ]
+    },
+    {
+      title: "Management",
+      items: [
+        { icon: Building2, label: 'Tenants', path: '/admin/tenants' },
+        { icon: Users, label: 'Users', path: '/admin/users' },
+        { icon: Shield, label: 'Roles & RBAC', path: '/admin/roles' },
+      ]
+    },
+    {
+      title: "Commerce",
+      items: [
+        { icon: CreditCard, label: 'Billing & Plans', path: '/admin/billing' },
+        { icon: Palette, label: 'Templates', path: '/admin/templates' },
+      ]
+    },
+    {
+      title: "Platform",
+      items: [
+        { icon: Globe, label: 'Sites & Domains', path: '/admin/sites' },
+        { icon: Server, label: 'Storage & CDN', path: '/admin/storage' },
+        { icon: FileText, label: 'CMS Global', path: '/admin/cms' },
+      ]
+    },
+    {
+      title: "Operations",
+      items: [
+        { icon: Headphones, label: 'Support Tickets', path: '/admin/support' },
+        { icon: Database, label: 'Audit Logs', path: '/admin/audit' },
+        { icon: Layers, label: 'Jobs & Queues', path: '/admin/jobs' },
+        { icon: Lock, label: 'Security', path: '/admin/security' },
+        { icon: RefreshCw, label: 'Backups', path: '/admin/backups' },
+      ]
+    },
+    {
+      title: "Settings",
+      items: [
+        { icon: Settings, label: 'App Config', path: '/admin/settings' },
+        { icon: Terminal, label: 'API Keys', path: '/admin/api' },
+        { icon: Flag, label: 'Feature Flags', path: '/admin/flags' },
+      ]
+    }
   ];
 
   return (
@@ -37,8 +73,8 @@ export const AdminLayout: React.FC = () => {
            <span className="font-bold text-lg tracking-tight text-white">Sewax Admin</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-4">
-           <div className="px-3 mb-2">
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
+           <div className="px-3 mb-4">
               <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-neutral-500" />
                  <input 
@@ -49,24 +85,31 @@ export const AdminLayout: React.FC = () => {
               </div>
            </div>
 
-           <nav className="space-y-0.5 px-3">
-              {menuItems.map((item) => {
-                const isActive = location.pathname === item.path;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => navigate(item.path)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                      isActive 
-                        ? 'bg-primary-900/20 text-primary-400 border border-primary-900/30' 
-                        : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
-                    }`}
-                  >
-                    <item.icon className={`w-4 h-4 ${isActive ? 'text-primary-500' : 'text-neutral-500'}`} />
-                    {item.label}
-                  </button>
-                );
-              })}
+           <nav className="space-y-6 px-3">
+              {menuGroups.map((group, idx) => (
+                <div key={idx}>
+                  <h4 className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2 px-3">{group.title}</h4>
+                  <div className="space-y-0.5">
+                    {group.items.map((item) => {
+                      const isActive = location.pathname === item.path;
+                      return (
+                        <button
+                          key={item.path}
+                          onClick={() => navigate(item.path)}
+                          className={`w-full flex items-center gap-3 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                            isActive 
+                              ? 'bg-primary-900/20 text-primary-400 border border-primary-900/30' 
+                              : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-200'
+                          }`}
+                        >
+                          <item.icon className={`w-3.5 h-3.5 ${isActive ? 'text-primary-500' : 'text-neutral-500'}`} />
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
            </nav>
         </div>
 
@@ -94,11 +137,11 @@ export const AdminLayout: React.FC = () => {
          {/* Admin Header */}
          <header className="h-16 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-8 sticky top-0 z-40">
             <div className="flex items-center gap-4">
-               <span className="px-2 py-1 rounded bg-red-900/30 text-red-400 border border-red-900/50 text-xs font-bold uppercase tracking-wide">
+               <span className="px-2 py-1 rounded bg-red-900/30 text-red-400 border border-red-900/50 text-[10px] font-bold uppercase tracking-wide">
                   Production Env
                </span>
                <div className="h-4 w-px bg-neutral-800"></div>
-               <span className="text-sm text-neutral-400">v2.4.0 (Build 8839)</span>
+               <span className="text-xs text-neutral-400 font-mono">v2.4.0 (Build 8839)</span>
             </div>
             
             <div className="flex items-center gap-4">
@@ -117,3 +160,8 @@ export const AdminLayout: React.FC = () => {
     </div>
   );
 };
+
+// Simple icon for placeholder usage if import fails
+const Activity = ({ className }: { className?: string }) => (
+  <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+);
