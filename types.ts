@@ -1,3 +1,4 @@
+
 export interface Template {
   id: string;
   name: string;
@@ -64,4 +65,38 @@ export interface UseCase {
   description: string;
   icon: any; // Lucide icon type
   benefits: string[];
+}
+
+// Commerce Interfaces
+export interface Product {
+  id: string;
+  title: string;
+  price: number;
+  inventory: number;
+  sku: string;
+  image: string;
+  category: string;
+  status: 'Active' | 'Draft' | 'Low Stock';
+}
+
+export interface Order {
+  id: string;
+  customer: string;
+  total: number;
+  status: 'Completed' | 'Pending' | 'Refunded';
+  channel: 'Online' | 'POS';
+  date: string;
+  itemsCount: number;
+}
+
+export interface CartItem extends Product {
+  quantity: number;
+}
+
+export interface Store {
+  id: string;
+  name: string;
+  domain: string;
+  plan: string;
+  themeId: string;
 }

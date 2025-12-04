@@ -103,7 +103,6 @@ export const Hero3D: React.FC = () => {
         initial={{ opacity: 0, scale: 0.8, y: 100 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        onError={() => setHasError(true)} // Basic error boundary simulation
       >
         {/* Base Layer - The "Platform" */}
         <div className="absolute inset-0 bg-white rounded-2xl shadow-2xl border border-gray-100/50 flex flex-col overflow-hidden transform translate-z-0 group hover:shadow-primary-500/20 transition-shadow duration-500">
