@@ -1,20 +1,24 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Check, Plus, ExternalLink } from 'lucide-react';
+import { Check, Plus, Loader2 } from 'lucide-react';
+import { useAuth } from '../auth/AuthProvider';
+import { supabase } from '../../lib/supabase/client';
 
 export const Integrations: React.FC = () => {
+  const { tenant } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [integrations, setIntegrations] = useState([
     {
-      id: 1,
+      id: 'esewa',
       name: 'eSewa Payment',
       category: 'Payments',
       description: 'Accept payments directly to your eSewa wallet. Supports QR codes and verified merchants.',
       icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple126/v4/0d/15/8e/0d158e8e-d910-6320-c75c-19601340156d/AppIcon-0-0-1x_U007emarketing-0-0-0-6-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/512x512bb.jpg',
-      connected: true
+      connected: false
     },
     {
-      id: 2,
+      id: 'khalti',
       name: 'Khalti Digital Wallet',
       category: 'Payments',
       description: 'Enable Khalti payments for your customers. Simple API key integration.',
@@ -22,15 +26,15 @@ export const Integrations: React.FC = () => {
       connected: false
     },
     {
-      id: 3,
+      id: 'ga4',
       name: 'Google Analytics 4',
       category: 'Analytics',
       description: 'Track visitors and conversion events with the latest GA4 tag.',
       icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Google_Analytics_logo.svg/1200px-Google_Analytics_logo.svg.png',
-      connected: true
+      connected: false
     },
     {
-      id: 4,
+      id: 'pixel',
       name: 'Facebook Pixel',
       category: 'Marketing',
       description: 'Retarget visitors on Facebook and Instagram with automated pixel events.',
@@ -38,7 +42,7 @@ export const Integrations: React.FC = () => {
       connected: false
     },
     {
-      id: 5,
+      id: 'whatsapp',
       name: 'WhatsApp Chat',
       category: 'Support',
       description: 'Add a floating WhatsApp button for direct customer support.',
@@ -47,11 +51,52 @@ export const Integrations: React.FC = () => {
     }
   ]);
 
-  const toggleIntegration = (id: number) => {
+  useEffect(() => {
+    if(!tenant) return;
+    // Load connected integrations from settings
+    const settings = tenant.settings as any || {};
+    const connectedIds = settings.connected_integrations || [];
+    
+    setIntegrations(prev => prev.map(i => ({
+        ...i,
+        connected: connectedIds.includes(i.id)
+    })));
+    setLoading(false);
+  }, [tenant]);
+
+  const toggleIntegration = async (id: string, currentState: boolean) => {
+    if(!tenant) return;
+    
+    // Optimistic update
     setIntegrations(prev => prev.map(app => 
-      app.id === id ? { ...app, connected: !app.connected } : app
+      app.id === id ? { ...app, connected: !currentState } : app
     ));
+
+    const settings = tenant.settings as any || {};
+    let currentList = settings.connected_integrations || [];
+    
+    if (currentState) {
+        // Disconnect
+        currentList = currentList.filter((i: string) => i !== id);
+    } else {
+        // Connect
+        currentList.push(id);
+    }
+
+    const { error } = await supabase.from('tenants').update({
+        settings: { ...settings, connected_integrations: currentList }
+    }).eq('id', tenant.id);
+
+    if (error) {
+        alert('Failed to update integration settings');
+        // Revert
+        setIntegrations(prev => prev.map(app => 
+            app.id === id ? { ...app, connected: currentState } : app
+        ));
+    }
   };
+
+  if (loading) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -84,7 +129,7 @@ export const Integrations: React.FC = () => {
                 <Button 
                    variant={app.connected ? 'outline' : 'primary'} 
                    className="w-full"
-                   onClick={() => toggleIntegration(app.id)}
+                   onClick={() => toggleIntegration(app.id, app.connected)}
                 >
                    {app.connected ? 'Configure' : 'Connect'}
                 </Button>

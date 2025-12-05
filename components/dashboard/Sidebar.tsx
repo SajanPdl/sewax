@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -77,11 +78,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 fixed inset-y-0 left-0 hidden lg:flex flex-col z-40">
+    <aside className="w-64 bg-white dark:bg-neutral-900 border-r border-gray-200 dark:border-neutral-800 fixed inset-y-0 left-0 hidden lg:flex flex-col z-40 transition-colors duration-300">
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-100">
+      <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-neutral-800">
         <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display mr-2 shadow-md">S</div>
-        <span className="font-display font-bold text-xl tracking-tight text-gray-900">Sewax</span>
+        <span className="font-display font-bold text-xl tracking-tight text-gray-900 dark:text-white">Sewax</span>
       </div>
       
       {/* Navigation */}
@@ -94,7 +95,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
 
           return (
             <div key={idx}>
-              <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">{group.label}</h4>
+              <h4 className="text-xs font-semibold text-gray-400 dark:text-neutral-500 uppercase tracking-wider mb-3 px-3">{group.label}</h4>
               <div className="space-y-1">
                 {visibleItems.map((item) => {
                   const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname === item.path);
@@ -104,12 +105,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
                       onClick={() => navigate(item.path)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
                         isActive 
-                        ? 'bg-primary-50 text-primary-700' 
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400' 
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-gray-900 dark:hover:text-gray-200'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <item.icon className={`w-4 h-4 ${isActive ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                        <item.icon className={`w-4 h-4 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`} />
                         {item.label}
                       </div>
                       {isActive && <ChevronRight className="w-3 h-3 text-primary-400" />}
@@ -123,36 +124,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       </div>
       
       {/* Footer / User Profile */}
-      <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+      <div className="p-4 border-t border-gray-100 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-800/30">
          <div className="flex justify-between items-center mb-4">
              <button 
                 onClick={() => navigate('/dashboard/support')}
-                className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-primary-600 transition-colors"
+                className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
              >
                 <HelpCircle className="w-3.5 h-3.5" /> Support
              </button>
              <button 
                 onClick={() => navigate('/dashboard/notifications')}
-                className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-primary-600 transition-colors"
+                className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
              >
                 <Bell className="w-3.5 h-3.5" /> Alerts
              </button>
          </div>
 
-        <div className="flex items-center gap-3 px-3 py-2 border-t border-gray-200 pt-3">
+        <div className="flex items-center gap-3 px-3 py-2 border-t border-gray-200 dark:border-neutral-700 pt-3">
           <div className="relative">
-             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
+             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white dark:ring-neutral-700">
                 {user?.email?.charAt(0).toUpperCase() || 'U'}
              </div>
-             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
+             <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-neutral-800 rounded-full"></div>
           </div>
           <div className="flex-1 overflow-hidden text-left">
-            <p className="text-sm font-medium text-gray-900 truncate">{tenant?.name || 'My Store'}</p>
-            <p className="text-xs text-gray-500 truncate capitalize">{role}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">{tenant?.name || 'My Store'}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate capitalize">{role}</p>
           </div>
           <button 
             onClick={onLogout}
-            className="text-gray-400 hover:text-red-600 transition-colors p-1 rounded-md hover:bg-red-50"
+            className="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
             title="Log Out"
           >
             <LogOut className="w-4 h-4" />

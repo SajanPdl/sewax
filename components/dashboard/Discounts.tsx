@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Tag, Plus, Loader2, Calendar } from 'lucide-react';
+import { Tag, Plus, Loader2, Calendar, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import { useAuth } from '../auth/AuthProvider';
 
@@ -9,10 +9,17 @@ export const Discounts: React.FC = () => {
   const { tenant } = useAuth();
   const [discounts, setDiscounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+      code: '',
+      type: 'percentage',
+      value: '',
+      expires_in_days: ''
+  });
 
   const fetchDiscounts = async () => {
      if (!tenant) return;
-     const { data } = await supabase.from('discounts').select('*').eq('tenant_id', tenant.id);
+     const { data } = await supabase.from('discounts').select('*').eq('tenant_id', tenant.id).order('created_at', {ascending: false});
      if (data) setDiscounts(data);
      setLoading(false);
   };
@@ -21,21 +28,26 @@ export const Discounts: React.FC = () => {
     fetchDiscounts();
   }, [tenant]);
 
-  const handleCreate = async () => {
+  const handleCreate = async (e: React.FormEvent) => {
+     e.preventDefault();
      if(!tenant) return;
-     const code = prompt('Enter discount code (e.g. SUMMER2024):');
-     if(!code) return;
-     const value = prompt('Enter percentage value (e.g. 10):');
-     if(!value) return;
+
+     let endsAt = null;
+     if(formData.expires_in_days) {
+         const d = new Date();
+         d.setDate(d.getDate() + parseInt(formData.expires_in_days));
+         endsAt = d.toISOString();
+     }
 
      const newDiscount = {
         tenant_id: tenant.id,
-        code: code.toUpperCase(),
-        type: 'percentage',
-        value: Number(value),
+        code: formData.code.toUpperCase(),
+        type: formData.type,
+        value: Number(formData.value),
         is_active: true,
         usage_count: 0,
-        starts_at: new Date().toISOString()
+        starts_at: new Date().toISOString(),
+        ends_at: endsAt
      };
 
      const { error } = await supabase.from('discounts').insert(newDiscount);
@@ -44,6 +56,8 @@ export const Discounts: React.FC = () => {
         alert('Error creating discount: ' + error.message);
      } else {
         fetchDiscounts();
+        setIsModalOpen(false);
+        setFormData({ code: '', type: 'percentage', value: '', expires_in_days: '' });
      }
   };
 
@@ -56,7 +70,7 @@ export const Discounts: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Discounts & Promotions</h1>
              <p className="text-gray-500">Create coupons and automatic discounts.</p>
           </div>
-          <Button className="flex items-center gap-2" onClick={handleCreate}>
+          <Button className="flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
              <Plus className="w-4 h-4" /> Create Discount
           </Button>
        </div>
@@ -86,7 +100,7 @@ export const Discounts: React.FC = () => {
           ))}
           
           <div 
-            onClick={handleCreate}
+            onClick={() => setIsModalOpen(true)}
             className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:bg-gray-100 transition-colors cursor-pointer"
           >
              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
@@ -96,6 +110,69 @@ export const Discounts: React.FC = () => {
              <p className="text-xs text-gray-500 mt-1">Percentage, Fixed Amount, or Free Shipping</p>
           </div>
        </div>
+
+       {isModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                   <h3 className="font-bold text-gray-900">New Discount</h3>
+                   <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                      <X className="w-5 h-5" />
+                   </button>
+                </div>
+                <form onSubmit={handleCreate} className="p-6 space-y-4">
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Code</label>
+                      <input 
+                        required 
+                        value={formData.code} 
+                        onChange={e => setFormData({...formData, code: e.target.value})} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm uppercase font-mono"
+                        placeholder="SUMMER25" 
+                      />
+                   </div>
+                   <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                            <select 
+                                value={formData.type} 
+                                onChange={e => setFormData({...formData, type: e.target.value})} 
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                            >
+                                <option value="percentage">Percentage (%)</option>
+                                <option value="fixed_amount">Fixed Amount (NPR)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                            <input 
+                                required 
+                                type="number" 
+                                value={formData.value} 
+                                onChange={e => setFormData({...formData, value: e.target.value})} 
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                placeholder="10" 
+                            />
+                        </div>
+                   </div>
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Duration (Days)</label>
+                      <input 
+                        type="number" 
+                        value={formData.expires_in_days} 
+                        onChange={e => setFormData({...formData, expires_in_days: e.target.value})} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        placeholder="Leave empty for no expiry" 
+                      />
+                   </div>
+                   <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                      <Button type="submit" className="flex-1">Create Discount</Button>
+                   </div>
+                </form>
+             </div>
+          </div>
+       )}
     </div>
   );
 };

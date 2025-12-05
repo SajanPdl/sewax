@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
+import { ThemeProvider, useTheme } from './components/ThemeContext';
 import { Sidebar } from './components/dashboard/Sidebar';
 import { Overview } from './components/dashboard/Overview';
 import { Templates } from './components/dashboard/Templates';
@@ -55,23 +57,33 @@ import { AdminFeatureFlags } from './components/admin/AdminFeatureFlags';
 import { AdminAnnouncements } from './components/admin/AdminAnnouncements';
 import { AdminDeployments } from './components/admin/AdminDeployments';
 import { Button } from './components/Button';
+import { Moon, Sun } from 'lucide-react';
 
 const Navbar: React.FC<{ 
   toggleLang: () => void; 
   lang: 'en' | 'np';
 }> = ({ toggleLang, lang }) => {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   
   return (
-    <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+    <nav className="fixed top-0 w-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-neutral-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display shadow-lg">S</div>
-            <span className="font-bold text-xl text-gray-900">Sewax</span>
+            <span className="font-bold text-xl text-gray-900 dark:text-white">Sewax</span>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>Sign In</Button>
+          <div className="hidden md:flex items-center gap-4">
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-neutral-800 transition-colors"
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <div className="h-6 w-px bg-gray-200 dark:bg-neutral-700 mx-2"></div>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="dark:text-gray-200 dark:hover:text-white">Sign In</Button>
             <Button variant="primary" size="sm" onClick={() => navigate('/login')}>Get Started</Button>
           </div>
         </div>
@@ -83,7 +95,7 @@ const Navbar: React.FC<{
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   const { session, loading } = useAuth();
-  if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-primary-600 dark:bg-neutral-900">Loading...</div>;
   if (!session) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
@@ -91,7 +103,7 @@ const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
 // Public Only Route (Redirects to Dashboard if logged in)
 const PublicOnlyRoute = ({ children }: { children?: React.ReactNode }) => {
   const { session, loading } = useAuth();
-  if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center text-primary-600 dark:bg-neutral-900">Loading...</div>;
   if (session) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
@@ -101,7 +113,7 @@ const DashboardLayout = () => {
   const { signOut } = useAuth();
   
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-neutral-900 transition-colors duration-300">
        <Sidebar onLogout={signOut} />
        <main className="flex-1 lg:ml-64 transition-all duration-300">
           <Routes>
@@ -144,62 +156,64 @@ const App: React.FC = () => {
   const [lang, setLang] = React.useState<'en'|'np'>('en');
 
   return (
-    <AuthProvider>
-      <HashRouter>
-        <Routes>
-          <Route path="/" element={
-            <>
-              <Navbar toggleLang={() => setLang(l => l==='en'?'np':'en')} lang={lang} />
-              <LandingPage lang={lang} />
-              <Footer />
-            </>
-          } />
-          
-          <Route path="/login" element={
-            <PublicOnlyRoute>
-              <SignIn />
-            </PublicOnlyRoute>
-          } />
-          
-          <Route path="/dashboard/*" element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          } />
+    <ThemeProvider>
+      <AuthProvider>
+        <HashRouter>
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Navbar toggleLang={() => setLang(l => l==='en'?'np':'en')} lang={lang} />
+                <LandingPage lang={lang} />
+                <Footer />
+              </>
+            } />
+            
+            <Route path="/login" element={
+              <PublicOnlyRoute>
+                <SignIn />
+              </PublicOnlyRoute>
+            } />
+            
+            <Route path="/dashboard/*" element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            } />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/*" element={
-             <AdminLayout>
-                <Routes>
-                   <Route index element={<Navigate to="dashboard" replace />} />
-                   <Route path="dashboard" element={<AdminDashboard />} />
-                   <Route path="reports" element={<AdminReports />} />
-                   <Route path="health" element={<AdminHealth />} />
-                   <Route path="tenants" element={<TenantManager />} />
-                   <Route path="users" element={<UserManager />} />
-                   <Route path="roles" element={<AdminRoles />} />
-                   <Route path="billing" element={<BillingOverview />} />
-                   <Route path="templates" element={<TemplateManager />} />
-                   <Route path="sites" element={<AdminSites />} />
-                   <Route path="storage" element={<AdminStorage />} />
-                   <Route path="cms" element={<AdminCMS />} />
-                   <Route path="support" element={<SupportTickets />} />
-                   <Route path="audit" element={<AuditLogs />} />
-                   <Route path="jobs" element={<AdminJobs />} />
-                   <Route path="security" element={<AdminSecurity />} />
-                   <Route path="backups" element={<AdminBackups />} />
-                   <Route path="settings" element={<AdminSettings />} />
-                   <Route path="api" element={<AdminAPIKeys />} />
-                   <Route path="flags" element={<AdminFeatureFlags />} />
-                   <Route path="announcements" element={<AdminAnnouncements />} />
-                   <Route path="deploys" element={<AdminDeployments />} />
-                </Routes>
-             </AdminLayout>
-          } />
-        </Routes>
-      </HashRouter>
-    </AuthProvider>
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/*" element={
+               <AdminLayout>
+                  <Routes>
+                     <Route index element={<Navigate to="dashboard" replace />} />
+                     <Route path="dashboard" element={<AdminDashboard />} />
+                     <Route path="reports" element={<AdminReports />} />
+                     <Route path="health" element={<AdminHealth />} />
+                     <Route path="tenants" element={<TenantManager />} />
+                     <Route path="users" element={<UserManager />} />
+                     <Route path="roles" element={<AdminRoles />} />
+                     <Route path="billing" element={<BillingOverview />} />
+                     <Route path="templates" element={<TemplateManager />} />
+                     <Route path="sites" element={<AdminSites />} />
+                     <Route path="storage" element={<AdminStorage />} />
+                     <Route path="cms" element={<AdminCMS />} />
+                     <Route path="support" element={<SupportTickets />} />
+                     <Route path="audit" element={<AuditLogs />} />
+                     <Route path="jobs" element={<AdminJobs />} />
+                     <Route path="security" element={<AdminSecurity />} />
+                     <Route path="backups" element={<AdminBackups />} />
+                     <Route path="settings" element={<AdminSettings />} />
+                     <Route path="api" element={<AdminAPIKeys />} />
+                     <Route path="flags" element={<AdminFeatureFlags />} />
+                     <Route path="announcements" element={<AdminAnnouncements />} />
+                     <Route path="deploys" element={<AdminDeployments />} />
+                  </Routes>
+               </AdminLayout>
+            } />
+          </Routes>
+        </HashRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

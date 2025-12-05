@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Search, Plus, Filter, MoreHorizontal, AlertCircle, Loader2, Trash2 } from 'lucide-react';
+import { Search, Plus, Filter, AlertCircle, Loader2, Trash2, X, Save, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import { useAuth } from '../auth/AuthProvider';
 
@@ -10,7 +10,18 @@ export const Products: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+  
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    sku: '',
+    price: '',
+    inventory: '',
+    category: 'General',
+    image_url: ''
+  });
 
   const fetchProducts = async () => {
     if (!tenant) return;
@@ -28,26 +39,41 @@ export const Products: React.FC = () => {
     fetchProducts();
   }, [tenant]);
 
-  const handleAddProduct = async () => {
+  const handleOpenModal = () => {
+     setFormData({
+        title: '',
+        sku: `SKU-${Math.floor(Math.random() * 10000)}`,
+        price: '',
+        inventory: '10',
+        category: 'General',
+        image_url: ''
+     });
+     setIsModalOpen(true);
+  };
+
+  const handleSaveProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!tenant) return;
-    setIsCreating(true);
-    // For this demo, we create a placeholder product that can be edited later
+    setIsSaving(true);
+
     const { error } = await supabase.from('products').insert({
        tenant_id: tenant.id,
-       title: 'New Product ' + Math.floor(Math.random() * 1000),
-       price: 1000,
-       inventory: 10,
-       status: 'Active',
-       sku: 'SKU-' + Math.floor(Math.random() * 10000),
-       category: 'General'
+       title: formData.title,
+       price: Number(formData.price),
+       inventory: Number(formData.inventory),
+       sku: formData.sku,
+       category: formData.category,
+       image_url: formData.image_url || null,
+       status: 'Active'
     });
 
     if (error) {
        alert('Failed to create product: ' + error.message);
     } else {
        await fetchProducts();
+       setIsModalOpen(false);
     }
-    setIsCreating(false);
+    setIsSaving(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -73,8 +99,8 @@ export const Products: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Products</h1>
              <p className="text-gray-500">Manage your inventory, pricing, and collections.</p>
           </div>
-          <Button onClick={handleAddProduct} isLoading={isCreating} className="flex items-center gap-2">
-             <Plus className="w-4 h-4" /> Quick Add Product
+          <Button onClick={handleOpenModal} className="flex items-center gap-2">
+             <Plus className="w-4 h-4" /> Add Product
           </Button>
        </div>
 
@@ -117,7 +143,7 @@ export const Products: React.FC = () => {
                                {product.image_url ? (
                                  <img src={product.image_url} alt="" className="w-full h-full object-cover" />
                                ) : (
-                                 <div className="text-xs">No Img</div>
+                                 <ImageIcon className="w-4 h-4" />
                                )}
                             </div>
                             <div>
@@ -170,6 +196,105 @@ export const Products: React.FC = () => {
              <p className="text-xs text-gray-500">Showing {filteredProducts.length} products</p>
           </div>
        </div>
+
+       {/* Add Product Modal */}
+       {isModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                   <h3 className="font-bold text-gray-900">Add New Product</h3>
+                   <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                      <X className="w-5 h-5" />
+                   </button>
+                </div>
+                <form onSubmit={handleSaveProduct} className="p-6 space-y-4">
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
+                      <input 
+                         required
+                         type="text" 
+                         value={formData.title}
+                         onChange={e => setFormData({...formData, title: e.target.value})}
+                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                         placeholder="e.g. Organic Coffee Beans"
+                      />
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-1">Price (NPR)</label>
+                         <input 
+                            required
+                            type="number" 
+                            min="0"
+                            value={formData.price}
+                            onChange={e => setFormData({...formData, price: e.target.value})}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                            placeholder="0.00"
+                         />
+                      </div>
+                      <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-1">Inventory</label>
+                         <input 
+                            required
+                            type="number" 
+                            min="0"
+                            value={formData.inventory}
+                            onChange={e => setFormData({...formData, inventory: e.target.value})}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                            placeholder="10"
+                         />
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                         <input 
+                            type="text" 
+                            value={formData.sku}
+                            onChange={e => setFormData({...formData, sku: e.target.value})}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                            placeholder="SKU-1001"
+                         />
+                      </div>
+                      <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                         <select 
+                            value={formData.category}
+                            onChange={e => setFormData({...formData, category: e.target.value})}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all bg-white"
+                         >
+                            <option>General</option>
+                            <option>Clothing</option>
+                            <option>Electronics</option>
+                            <option>Food & Beverage</option>
+                            <option>Service</option>
+                         </select>
+                      </div>
+                   </div>
+                   
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                      <input 
+                         type="url" 
+                         value={formData.image_url}
+                         onChange={e => setFormData({...formData, image_url: e.target.value})}
+                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                         placeholder="https://example.com/image.jpg"
+                      />
+                   </div>
+
+                   <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                      <Button type="submit" className="flex-1" isLoading={isSaving}>
+                         <Save className="w-4 h-4 mr-2" /> Save Product
+                      </Button>
+                   </div>
+                </form>
+             </div>
+          </div>
+       )}
     </div>
   );
 };

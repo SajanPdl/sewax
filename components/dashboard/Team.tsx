@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
-import { Mail, Shield, Trash2, UserPlus, Lock, Loader2 } from 'lucide-react';
+import { Mail, Shield, Trash2, UserPlus, Lock, Loader2, X } from 'lucide-react';
 import { RBACWrapper } from './RBACWrapper';
 import { supabase } from '../../lib/supabase/client';
 import { useAuth } from '../auth/AuthProvider';
@@ -10,6 +10,9 @@ export const Team: React.FC = () => {
   const { tenant, role } = useAuth();
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState('Viewer');
 
   useEffect(() => {
     if (!tenant) return;
@@ -34,15 +37,15 @@ export const Team: React.FC = () => {
     setLoading(false);
   };
 
-  const handleInvite = async () => {
-      const email = prompt("Enter email address of the user to invite:");
-      if(!email) return;
+  const handleInvite = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if(!inviteEmail) return;
 
       // Check if user exists in profiles
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('id')
-        .eq('email', email)
+        .eq('email', inviteEmail)
         .single();
       
       if (error || !profile) {
@@ -56,14 +59,16 @@ export const Team: React.FC = () => {
         .insert({
             tenant_id: tenant.id,
             user_id: profile.id,
-            role: 'Viewer' // Default role
+            role: inviteRole
         });
 
       if (inviteError) {
           alert('Failed to invite: ' + inviteError.message);
       } else {
-          alert(`Successfully added ${email} to the team!`);
+          alert(`Successfully added ${inviteEmail} to the team!`);
           fetchMembers();
+          setIsModalOpen(false);
+          setInviteEmail('');
       }
   };
 
@@ -94,7 +99,7 @@ export const Team: React.FC = () => {
                 <Lock className="w-4 h-4" /> Invite Member
              </Button>
           }>
-             <Button className="flex items-center gap-2" onClick={handleInvite}>
+             <Button className="flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
                 <UserPlus className="w-4 h-4" /> Invite Member
              </Button>
           </RBACWrapper>
@@ -160,6 +165,49 @@ export const Team: React.FC = () => {
           </table>
           {members.length === 0 && <div className="p-8 text-center text-gray-500">No members found.</div>}
        </div>
+
+       {isModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                   <h3 className="font-bold text-gray-900">Invite Team Member</h3>
+                   <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                      <X className="w-5 h-5" />
+                   </button>
+                </div>
+                <form onSubmit={handleInvite} className="p-6 space-y-4">
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                      <input 
+                        required 
+                        type="email"
+                        value={inviteEmail} 
+                        onChange={e => setInviteEmail(e.target.value)} 
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        placeholder="colleague@example.com" 
+                      />
+                   </div>
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                      <select 
+                        value={inviteRole} 
+                        onChange={e => setInviteRole(e.target.value)}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+                      >
+                         <option value="Admin">Admin (Full Access)</option>
+                         <option value="Editor">Editor (Manage Content)</option>
+                         <option value="Viewer">Viewer (Read Only)</option>
+                      </select>
+                   </div>
+                   
+                   <div className="flex gap-3 pt-4">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                      <Button type="submit" className="flex-1">Send Invite</Button>
+                   </div>
+                </form>
+             </div>
+          </div>
+       )}
     </div>
   );
 };

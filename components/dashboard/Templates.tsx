@@ -1,15 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Search, Layout, Loader2 } from 'lucide-react';
+import { Search, Layout, Loader2, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase/client';
+import { useAuth } from '../auth/AuthProvider';
 
 export const Templates: React.FC = () => {
+  const { tenant } = useAuth();
   const [filter, setFilter] = useState('All');
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS'];
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  
+  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS', 'General'];
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -24,6 +28,33 @@ export const Templates: React.FC = () => {
     fetchTemplates();
   }, []);
 
+  const handleSelectTemplate = async (template: any) => {
+    if(!tenant) return;
+    if(!confirm(`Apply ${template.name} to your site? This will update your theme settings.`)) return;
+    
+    setApplyingId(template.id);
+    
+    // Update tenant settings with active theme
+    const currentSettings = tenant.settings as Record<string, any> || {};
+    const newSettings = { 
+        ...currentSettings, 
+        active_theme_id: template.id, 
+        theme_name: template.name 
+    };
+    
+    const { error } = await supabase.from('tenants').update({
+        settings: newSettings
+    }).eq('id', tenant.id);
+    
+    if(error) {
+        alert('Failed to apply template: ' + error.message);
+    } else {
+        alert('Template applied successfully!');
+        // Ideally reload tenant or context here, but UI update is sufficient for now
+    }
+    setApplyingId(null);
+  }
+
   const filteredTemplates = filter === 'All' 
     ? templates 
     : templates.filter(t => t.category === filter);
@@ -31,6 +62,9 @@ export const Templates: React.FC = () => {
   if (loading) {
     return <div className="flex h-96 items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary-500" /></div>;
   }
+
+  // Helper to check if current template is active
+  const activeThemeId = (tenant?.settings as any)?.active_theme_id;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -68,37 +102,58 @@ export const Templates: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map((template) => (
-          <motion.div 
-            layout
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            key={template.id} 
-            className="group bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-xl hover:border-primary-100 transition-all duration-300"
-          >
-            <div className="relative h-48 overflow-hidden bg-gray-100">
-               <img 
-                 src={template.image_url} 
-                 alt={template.name} 
-                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-               />
-               <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                 <span className="bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded text-gray-800 shadow-sm">
-                   {template.category}
-                 </span>
-               </div>
-            </div>
-            <div className="p-5">
-              <h3 className="font-bold text-lg text-gray-900 mb-1">{template.name}</h3>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{template.description}</p>
-              
-              <div className="flex gap-3">
-                <Button variant="outline" size="sm" className="flex-1">Preview</Button>
-                <Button size="sm" className="flex-1">Select</Button>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+        {filteredTemplates.map((template) => {
+          const isActive = activeThemeId === template.id;
+          return (
+            <motion.div 
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                key={template.id} 
+                className={`group bg-white rounded-xl overflow-hidden shadow-sm border transition-all duration-300 ${isActive ? 'border-green-500 ring-2 ring-green-500/20' : 'border-gray-200 hover:shadow-xl hover:border-primary-100'}`}
+            >
+                <div className="relative h-48 overflow-hidden bg-gray-100">
+                <img 
+                    src={template.image_url} 
+                    alt={template.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded text-gray-800 shadow-sm">
+                    {template.category}
+                    </span>
+                </div>
+                {isActive && (
+                    <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center backdrop-blur-sm">
+                        <span className="bg-white text-green-700 px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center gap-2">
+                            <Check className="w-4 h-4" /> Active Theme
+                        </span>
+                    </div>
+                )}
+                </div>
+                <div className="p-5">
+                <h3 className="font-bold text-lg text-gray-900 mb-1">{template.name}</h3>
+                <p className="text-sm text-gray-500 mb-4 line-clamp-2">{template.description}</p>
+                
+                <div className="flex gap-3">
+                    <Button variant="outline" size="sm" className="flex-1">Preview</Button>
+                    {isActive ? (
+                         <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 border-green-600" disabled>Active</Button>
+                    ) : (
+                        <Button 
+                            size="sm" 
+                            className="flex-1" 
+                            onClick={() => handleSelectTemplate(template)}
+                            isLoading={applyingId === template.id}
+                        >
+                            Select
+                        </Button>
+                    )}
+                </div>
+                </div>
+            </motion.div>
+          );
+        })}
         
         {filteredTemplates.length === 0 && (
            <div className="col-span-full border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center bg-gray-50/50">

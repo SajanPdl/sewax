@@ -12,15 +12,35 @@ export const SitesList: React.FC = () => {
 
   useEffect(() => {
     if(!tenant) return;
-    const fetchPages = async () => {
-       const { data } = await supabase.from('pages').select('*').eq('tenant_id', tenant.id);
-       if(data) setPages(data);
-       setLoading(false);
-    };
     fetchPages();
   }, [tenant]);
 
-  if (!tenant) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
+  const fetchPages = async () => {
+     const { data } = await supabase.from('pages').select('*').eq('tenant_id', tenant.id);
+     if(data) setPages(data);
+     setLoading(false);
+  };
+
+  const handleAddPage = async () => {
+      if(!tenant) return;
+      const title = prompt("Enter page title (e.g. About Us):");
+      if(!title) return;
+      
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+      const { error } = await supabase.from('pages').insert({
+          tenant_id: tenant.id,
+          title,
+          slug,
+          is_published: false,
+          content: { type: 'empty' }
+      });
+
+      if(error) alert('Error creating page: ' + error.message);
+      else fetchPages();
+  };
+
+  if (loading || !tenant) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -84,7 +104,10 @@ export const SitesList: React.FC = () => {
                        </div>
                     </div>
                  ))}
-                 <button className="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-sm font-medium text-gray-400 hover:text-primary-600 hover:border-primary-300 transition-colors">
+                 <button 
+                    onClick={handleAddPage}
+                    className="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-sm font-medium text-gray-400 hover:text-primary-600 hover:border-primary-300 transition-colors"
+                 >
                     + Add New Page
                  </button>
               </div>
