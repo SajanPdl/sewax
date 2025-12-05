@@ -23,6 +23,7 @@ import { FeaturesPage } from './components/public/FeaturesPage';
 import { PricingPage } from './components/public/PricingPage';
 import { TemplatesPage } from './components/public/TemplatesPage';
 import { ContactPage } from './components/public/ContactPage';
+import { PreviewPage } from './components/public/PreviewPage';
 
 // Commerce Imports
 import { POS } from './components/dashboard/POS';
@@ -38,6 +39,14 @@ import { Marketing } from './components/dashboard/Marketing';
 import { Reports } from './components/dashboard/Reports';
 import { Notifications } from './components/dashboard/Notifications';
 import { Support } from './components/dashboard/Support';
+
+// New Industry Module Placeholders
+import { 
+  MenuManager, TableManager, KitchenDisplay, 
+  ServiceList, Appointments, 
+  Courses, Students, 
+  Projects, CMS 
+} from './components/dashboard/modules/Placeholders';
 
 // Admin Imports
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -98,6 +107,23 @@ const DashboardLayout = () => {
               <Route path="inventory" element={<Inventory />} />
               <Route path="customers" element={<Customers />} />
               
+              {/* Restaurant */}
+              <Route path="menu" element={<MenuManager />} />
+              <Route path="tables" element={<TableManager />} />
+              <Route path="kitchen" element={<KitchenDisplay />} />
+
+              {/* Service */}
+              <Route path="services" element={<ServiceList />} />
+              <Route path="appointments" element={<Appointments />} />
+
+              {/* Education */}
+              <Route path="courses" element={<Courses />} />
+              <Route path="students" element={<Students />} />
+
+              {/* Agency */}
+              <Route path="projects" element={<Projects />} />
+              <Route path="cms" element={<CMS />} />
+
               {/* Online Store */}
               <Route path="sites" element={<SitesList />} />
               <Route path="builder" element={<WebsiteBuilder />} />
@@ -142,6 +168,9 @@ const App: React.FC = () => {
       <AuthProvider>
         <HashRouter>
           <Routes>
+            {/* Preview Route - Standalone */}
+            <Route path="/preview/:slug" element={<PreviewPage />} />
+
             {/* Public Pages */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<LandingPage lang={lang} />} />

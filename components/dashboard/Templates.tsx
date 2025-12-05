@@ -12,6 +12,7 @@ export const Templates: React.FC = () => {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [applyingId, setApplyingId] = useState<string | null>(null);
+  const MotionDiv = motion.div as any;
   
   const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS', 'Business', 'General'];
 
@@ -35,13 +36,14 @@ export const Templates: React.FC = () => {
     
     setApplyingId(template.id);
     
-    // Update tenant settings with active theme
+    // Update tenant settings with active theme AND Category
     const currentSettings = tenant.settings as Record<string, any> || {};
     const newSettings = { 
         ...currentSettings, 
         active_theme_id: template.id, 
         theme_name: template.name,
-        theme_slug: template.slug
+        theme_slug: template.slug,
+        theme_category: template.category // IMPORTANT: This drives the sidebar
     };
     
     const { error } = await supabase.from('tenants').update({
@@ -51,15 +53,19 @@ export const Templates: React.FC = () => {
     if(error) {
         alert('Failed to apply template: ' + error.message);
     } else {
-        alert('Template applied successfully!');
-        window.location.reload(); // Quick refresh to update state
+        alert('Template applied successfully! Your dashboard will now update.');
+        window.location.reload(); // Reload to refresh sidebar config
     }
     setApplyingId(null);
   }
 
   const handlePreview = (template: any) => {
+      // Prioritize explicit URL, then fallback to local preview route
       if (template.preview_url) {
           window.open(template.preview_url, '_blank');
+      } else if (template.slug) {
+          const url = `${window.location.origin}/#/preview/${template.slug}`;
+          window.open(url, '_blank');
       } else {
           alert('Preview unavailable for this template.');
       }
@@ -115,7 +121,7 @@ export const Templates: React.FC = () => {
         {filteredTemplates.map((template) => {
           const isActive = activeThemeId === template.id;
           return (
-            <motion.div 
+            <MotionDiv 
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -161,7 +167,7 @@ export const Templates: React.FC = () => {
                     )}
                 </div>
                 </div>
-            </motion.div>
+            </MotionDiv>
           );
         })}
         

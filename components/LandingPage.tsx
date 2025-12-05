@@ -16,6 +16,7 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
   const [billingCycle, setBillingCycle] = React.useState<'monthly' | 'yearly'>('monthly');
   const [templates, setTemplates] = useState<any[]>([]);
+  const MotionDiv = motion.div as any;
 
   useEffect(() => {
     const fetchFeaturedTemplates = async () => {
@@ -61,7 +62,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-24 w-full relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
+            <MotionDiv 
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
@@ -85,7 +86,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
                   View Templates
                 </Button>
               </div>
-            </motion.div>
+            </MotionDiv>
             
             <div className="relative">
               <Hero3D />
@@ -116,7 +117,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
       {/* 3. Core Features Deep Dive */}
       <section id="features" className="py-24 bg-white dark:bg-neutral-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+          <MotionDiv 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -126,7 +127,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
              <span className="text-primary-600 dark:text-primary-400 font-bold tracking-wider uppercase text-sm">Features</span>
             <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900 dark:text-white mt-2 mb-4">Everything local, yet global.</h2>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg">We've integrated the tools Nepali businesses actually use, wrapped in world-class performance.</p>
-          </motion.div>
+          </MotionDiv>
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -137,7 +138,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
               { icon: Code, title: 'No-Code Editor', desc: 'Drag, drop, and customize without writing a single line.', color: 'text-pink-600', bg: 'bg-pink-50' },
               { icon: ShoppingCart, title: 'Nepali Payments', desc: 'Native eSewa & Khalti integration. (Coming Soon)', color: 'text-primary-600', bg: 'bg-primary-50', badge: 'Beta' },
             ].map((f, i) => (
-              <motion.div 
+              <MotionDiv 
                 key={i}
                 initial="hidden"
                 whileInView="visible"
@@ -159,7 +160,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
                 }}
                 className="p-8 rounded-2xl bg-white dark:bg-neutral-800 border border-gray-100 dark:border-neutral-700 hover:border-primary-100 transition-colors group"
               >
-                <motion.div 
+                <MotionDiv 
                   variants={{
                     hover: { 
                       scale: 1.1, 
@@ -170,14 +171,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ lang }) => {
                   className={`w-14 h-14 rounded-2xl ${f.bg} dark:bg-neutral-700 flex items-center justify-center ${f.color} mb-6`}
                 >
                   <f.icon className="w-7 h-7" />
-                </motion.div>
+                </MotionDiv>
                 
                 <div className="flex justify-between items-start">
                    <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{f.title}</h3>
                    {f.badge && <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary-100 text-primary-700 uppercase">{f.badge}</span>}
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{f.desc}</p>
-              </motion.div>
+              </MotionDiv>
             ))}
           </div>
         </div>

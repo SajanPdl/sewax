@@ -214,6 +214,7 @@ const StepImage = ({ stepId }: { stepId: number }) => {
 };
 
 export const StartWizard: React.FC = () => {
+  const MotionDiv = motion.div as any;
   return (
     <div className="w-full">
       <div className="text-center mb-20">
@@ -229,7 +230,7 @@ export const StartWizard: React.FC = () => {
         {STEPS.map((step, index) => {
           const isEven = index % 2 === 0;
           return (
-            <motion.div 
+            <MotionDiv 
               key={step.id}
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -260,7 +261,7 @@ export const StartWizard: React.FC = () => {
                     <StepImage stepId={step.id} />
                  </div>
               </div>
-            </motion.div>
+            </MotionDiv>
           );
         })}
       </div>

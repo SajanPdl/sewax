@@ -13,6 +13,7 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
   const [width, setWidth] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const MotionDiv = motion.div as any;
 
   useEffect(() => {
     if (carouselRef.current) {
@@ -55,13 +56,13 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
         </div>
 
         {/* Carousel Container */}
-        <motion.div 
+        <MotionDiv 
           ref={carouselRef}
           className="flex gap-6 overflow-x-auto py-8 px-4 scrollbar-hide snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {templates.map((template) => (
-            <motion.div 
+            <MotionDiv 
               key={template.id}
               className="min-w-[280px] md:min-w-[340px] snap-center bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary-100 transition-all duration-300 flex flex-col group/card"
               initial={{ opacity: 0, y: 20 }}
@@ -102,16 +103,16 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
                   Use Template
                 </Button>
               </div>
-            </motion.div>
+            </MotionDiv>
           ))}
-        </motion.div>
+        </MotionDiv>
       </div>
 
       {/* Template Details Modal */}
       <AnimatePresence>
         {selectedTemplate && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div 
+            <MotionDiv 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }}
@@ -119,7 +120,7 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
               onClick={() => setSelectedTemplate(null)}
             />
             
-            <motion.div 
+            <MotionDiv 
               className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden relative z-10 max-h-[90vh] flex flex-col md:flex-row"
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -188,7 +189,7 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
                   </Button>
                 </div>
               </div>
-            </motion.div>
+            </MotionDiv>
           </div>
         )}
       </AnimatePresence>

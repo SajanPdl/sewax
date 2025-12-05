@@ -37,8 +37,10 @@ export const Button: React.FC<ButtonProps> = ({
     lg: 'px-8 py-3.5 text-lg',
   };
 
+  const MotionButton = motion.button as any;
+
   return (
-    <motion.button
+    <MotionButton
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
@@ -57,6 +59,6 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         children
       )}
-    </motion.button>
+    </MotionButton>
   );
 };

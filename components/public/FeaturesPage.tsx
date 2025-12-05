@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Zap, Smartphone, Shield, Globe, Code, ShoppingCart, BarChart, Server, Layout } from 'lucide-react';
 
 export const FeaturesPage: React.FC = () => {
+  const MotionDiv = motion.div as any;
   const features = [
     { icon: Zap, title: 'Lightning Fast CDN', desc: 'Sites load in under 1s from Kathmandu to New York.', color: 'text-yellow-600', bg: 'bg-yellow-50' },
     { icon: Smartphone, title: 'Mobile First', desc: 'Optimized for 4G networks and mobile displays by default.', color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -25,7 +26,7 @@ export const FeaturesPage: React.FC = () => {
         </div>
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((f, i) => (
-            <motion.div 
+            <MotionDiv 
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -37,7 +38,7 @@ export const FeaturesPage: React.FC = () => {
               </div>
               <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">{f.title}</h3>
               <p className="text-gray-600 dark:text-gray-400">{f.desc}</p>
-            </motion.div>
+            </MotionDiv>
           ))}
         </div>
       </div>

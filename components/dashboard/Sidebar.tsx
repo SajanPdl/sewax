@@ -1,81 +1,178 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
-  Settings, 
-  CreditCard, 
-  LogOut, 
-  Globe, 
-  PenTool, 
-  BarChart2, 
-  Users, 
-  Puzzle, 
-  HelpCircle,
-  ChevronRight, 
-  ShoppingBag, 
-  ShoppingCart, 
-  Monitor,
-  Package,
-  User,
-  Tag,
-  Megaphone,
-  MapPin,
-  FileText,
-  Bell
+  LayoutDashboard, Settings, CreditCard, LogOut, Globe, PenTool, BarChart2, 
+  Users, Puzzle, HelpCircle, ChevronRight, ShoppingBag, ShoppingCart, Monitor, 
+  Package, User, Tag, Megaphone, MapPin, FileText, Bell, Utensils, 
+  ChefHat, Calendar, BookOpen, Layers, ClipboardList, Coffee
 } from 'lucide-react';
 import { UserRole, hasPermission } from './RBACWrapper';
 import { useAuth } from '../auth/AuthProvider';
+import { getTemplateConfig, ModuleType } from '../../lib/template-registry';
 
 interface SidebarProps {
   onLogout: () => void;
 }
+
+// Icon mapping for all possible modules
+const MODULE_ICONS: Record<ModuleType, any> = {
+  // Core
+  overview: LayoutDashboard,
+  settings: Settings,
+  billing: CreditCard,
+  team: Users,
+  support: HelpCircle,
+  reports: FileText,
+  integrations: Puzzle,
+  notifications: Bell,
+  locations: MapPin,
+  
+  // Commerce
+  products: ShoppingBag,
+  orders: ShoppingCart,
+  inventory: Package,
+  customers: User,
+  pos: Monitor,
+  discounts: Tag,
+  
+  // Site
+  sites: Globe,
+  builder: PenTool,
+  templates: Layers,
+  analytics: BarChart2,
+  marketing: Megaphone,
+  
+  // Restaurant
+  menu: BookOpen,
+  tables: Utensils,
+  kitchen: ChefHat,
+  
+  // Service
+  services: ClipboardList,
+  appointments: Calendar,
+  
+  // Education
+  courses: BookOpen,
+  students: Users,
+  
+  // Agency
+  projects: Layers,
+  cms: FileText,
+};
+
+// Label mapping for display
+const MODULE_LABELS: Record<ModuleType, string> = {
+  overview: 'Overview',
+  pos: 'Point of Sale',
+  orders: 'Orders',
+  products: 'Products',
+  menu: 'Menu Management',
+  inventory: 'Inventory',
+  customers: 'Customers',
+  tables: 'Table Management',
+  kitchen: 'Kitchen Display',
+  services: 'Services',
+  appointments: 'Appointments',
+  courses: 'Courses',
+  students: 'Students',
+  projects: 'Projects',
+  cms: 'CMS & Content',
+  discounts: 'Discounts',
+  marketing: 'Marketing',
+  analytics: 'Analytics',
+  sites: 'Sites & Domains',
+  builder: 'Website Builder',
+  templates: 'Templates',
+  locations: 'Locations',
+  reports: 'Reports',
+  team: 'Team',
+  integrations: 'Integrations',
+  notifications: 'Notifications',
+  settings: 'Settings',
+  billing: 'Billing',
+  support: 'Support'
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, tenant, role } = useAuth();
 
-  const menuGroups = [
-    {
-      label: "Commerce",
-      items: [
-        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-        { icon: Monitor, label: 'Point of Sale', path: '/dashboard/pos', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: ShoppingCart, label: 'Orders', path: '/dashboard/orders', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-        { icon: ShoppingBag, label: 'Products', path: '/dashboard/products', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: Package, label: 'Inventory', path: '/dashboard/inventory', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: User, label: 'Customers', path: '/dashboard/customers', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-      ]
-    },
-    {
-      label: "Growth",
-      items: [
-        { icon: Tag, label: 'Discounts', path: '/dashboard/discounts', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: Megaphone, label: 'Marketing', path: '/dashboard/marketing', allowed: ['Owner', 'Admin'] as UserRole[] },
-        { icon: BarChart2, label: 'Analytics', path: '/dashboard/analytics', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-      ]
-    },
-    {
-      label: "Online Store",
-      items: [
-        { icon: Globe, label: 'Sites & Domains', path: '/dashboard/sites', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-        { icon: PenTool, label: 'Website Builder', path: '/dashboard/builder', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: LayoutDashboard, label: 'Templates', path: '/dashboard/templates', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-      ]
-    },
-    {
-      label: "Organization",
-      items: [
-        { icon: MapPin, label: 'Locations', path: '/dashboard/locations', allowed: ['Owner', 'Admin'] as UserRole[] },
-        { icon: Users, label: 'Team', path: '/dashboard/team', allowed: ['Owner', 'Admin'] as UserRole[] },
-        { icon: FileText, label: 'Reports', path: '/dashboard/reports', allowed: ['Owner', 'Admin', 'Accountant'] as UserRole[] },
-        { icon: CreditCard, label: 'Billing', path: '/dashboard/billing', allowed: ['Owner'] as UserRole[] },
-        { icon: Puzzle, label: 'Integrations', path: '/dashboard/integrations', allowed: ['Owner', 'Admin'] as UserRole[] },
-        { icon: Settings, label: 'Settings', path: '/dashboard/settings', allowed: ['Owner', 'Admin'] as UserRole[] },
-      ]
-    }
-  ];
+  // 1. Determine Active Template Config
+  const activeConfig = useMemo(() => {
+    // Fallback to 'General' (or 'E-commerce' as default) if no category set
+    const category = (tenant?.settings as any)?.theme_category || 'E-commerce';
+    return getTemplateConfig(category);
+  }, [tenant]);
+
+  // 2. Generate Menu Groups based on Enabled Modules
+  const menuGroups = useMemo(() => {
+    const modules = activeConfig.modules;
+    
+    const groups = [
+      {
+        label: "Operations",
+        items: [] as any[]
+      },
+      {
+        label: "Growth & Online",
+        items: [] as any[]
+      },
+      {
+        label: "Organization",
+        items: [] as any[]
+      }
+    ];
+
+    // Helper to add item if enabled
+    const addItem = (key: ModuleType, groupIndex: number, allowedRoles: UserRole[] = ['Owner', 'Admin', 'Editor']) => {
+      if (modules[key]) {
+        groups[groupIndex].items.push({
+          key,
+          icon: MODULE_ICONS[key],
+          label: MODULE_LABELS[key],
+          path: key === 'overview' ? '/dashboard' : `/dashboard/${key}`,
+          allowed: allowedRoles
+        });
+      }
+    };
+
+    // --- Group 1: Operations (The "Work" stuff) ---
+    addItem('overview', 0, ['Owner', 'Admin', 'Editor', 'Viewer']);
+    addItem('pos', 0);
+    addItem('orders', 0);
+    addItem('tables', 0);
+    addItem('kitchen', 0);
+    addItem('appointments', 0);
+    addItem('products', 0);
+    addItem('menu', 0);
+    addItem('services', 0);
+    addItem('courses', 0);
+    addItem('students', 0);
+    addItem('inventory', 0);
+    addItem('customers', 0);
+    addItem('projects', 0);
+    addItem('cms', 0);
+
+    // --- Group 2: Growth & Online ---
+    addItem('sites', 1);
+    addItem('builder', 1);
+    addItem('templates', 1);
+    addItem('discounts', 1);
+    addItem('marketing', 1);
+    addItem('analytics', 1, ['Owner', 'Admin', 'Editor', 'Viewer']);
+
+    // --- Group 3: Organization ---
+    addItem('locations', 2);
+    addItem('team', 2);
+    addItem('reports', 2);
+    addItem('billing', 2, ['Owner']);
+    addItem('integrations', 2);
+    addItem('settings', 2);
+
+    return groups.filter(g => g.items.length > 0);
+  }, [activeConfig]);
 
   return (
     <aside className="w-64 bg-white dark:bg-neutral-900 border-r border-gray-200 dark:border-neutral-800 fixed inset-y-0 left-0 hidden lg:flex flex-col z-40 transition-colors duration-300">
@@ -83,6 +180,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-neutral-800">
         <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display mr-2 shadow-md">S</div>
         <span className="font-display font-bold text-xl tracking-tight text-gray-900 dark:text-white">Sewax</span>
+        <span className="ml-2 text-[10px] bg-gray-100 dark:bg-neutral-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 dark:border-neutral-700 uppercase">
+            {activeConfig.slug.slice(0, 4)}
+        </span>
       </div>
       
       {/* Navigation */}
