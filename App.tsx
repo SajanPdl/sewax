@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useNavigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
 import { ThemeProvider, useTheme } from './components/ThemeContext';
 import { Sidebar } from './components/dashboard/Sidebar';
@@ -16,6 +16,13 @@ import { Integrations } from './components/dashboard/Integrations';
 import { WebsiteBuilder } from './components/dashboard/WebsiteBuilder';
 import { LandingPage } from './components/LandingPage';
 import { Footer } from './components/Footer';
+import { Navbar } from './components/Navbar';
+
+// Public Pages
+import { FeaturesPage } from './components/public/FeaturesPage';
+import { PricingPage } from './components/public/PricingPage';
+import { TemplatesPage } from './components/public/TemplatesPage';
+import { ContactPage } from './components/public/ContactPage';
 
 // Commerce Imports
 import { POS } from './components/dashboard/POS';
@@ -56,41 +63,6 @@ import { AdminAPIKeys } from './components/admin/AdminAPIKeys';
 import { AdminFeatureFlags } from './components/admin/AdminFeatureFlags';
 import { AdminAnnouncements } from './components/admin/AdminAnnouncements';
 import { AdminDeployments } from './components/admin/AdminDeployments';
-import { Button } from './components/Button';
-import { Moon, Sun } from 'lucide-react';
-
-const Navbar: React.FC<{ 
-  toggleLang: () => void; 
-  lang: 'en' | 'np';
-}> = ({ toggleLang, lang }) => {
-  const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
-  
-  return (
-    <nav className="fixed top-0 w-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md z-50 border-b border-gray-100 dark:border-neutral-800 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center text-white font-bold font-display shadow-lg">S</div>
-            <span className="font-bold text-xl text-gray-900 dark:text-white">Sewax</span>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <button 
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-neutral-800 transition-colors"
-              aria-label="Toggle Theme"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-            <div className="h-6 w-px bg-gray-200 dark:bg-neutral-700 mx-2"></div>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="dark:text-gray-200 dark:hover:text-white">Sign In</Button>
-            <Button variant="primary" size="sm" onClick={() => navigate('/login')}>Get Started</Button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
@@ -152,21 +124,32 @@ const DashboardLayout = () => {
   );
 };
 
+// Public Layout
+const PublicLayout = () => (
+  <>
+    <Navbar />
+    <Outlet />
+    <Footer />
+  </>
+);
+
 const App: React.FC = () => {
-  const [lang, setLang] = React.useState<'en'|'np'>('en');
+  // Using default lang for landing page for now, can be expanded to context if needed
+  const lang = 'en';
 
   return (
     <ThemeProvider>
       <AuthProvider>
         <HashRouter>
           <Routes>
-            <Route path="/" element={
-              <>
-                <Navbar toggleLang={() => setLang(l => l==='en'?'np':'en')} lang={lang} />
-                <LandingPage lang={lang} />
-                <Footer />
-              </>
-            } />
+            {/* Public Pages */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<LandingPage lang={lang} />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+            </Route>
             
             <Route path="/login" element={
               <PublicOnlyRoute>
