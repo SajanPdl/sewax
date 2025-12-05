@@ -1,0 +1,108 @@
+.header-info-right ul.user-account {
+    margin-right: 0px;
+    margin-left: 30px;
+}
+.header-top .header-info-right .select-language .nice-select {
+    margin-right: 0px;
+    margin-left: 20px;
+    padding-left: 30px;
+    padding-right: 10px;
+}
+.header-top .header-info-right .select-language .nice-select::after {
+    right: auto;
+    left: 10px;
+}
+.header-top .header-info-left .listing {
+    display: flex;
+    align-items: center;
+}
+.header-top .header-info-left .listing .listItem {
+    margin-right: 0px;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+}
+.header-top .header-info-left .listing .listItem .icon {
+    margin-right: 5px;
+}
+
+.navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li a {
+    padding: 10px 0px 10px 30px;
+}
+
+.navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+    padding: 10px 0px 10px 30px;
+}
+.navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a::after {
+    left: -4px;
+}
+
+.navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children .sub-menu {
+    text-align: right;
+    left: auto;
+    right: 0;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-area.construction_nav.white-nav .navbar-toggler {
+        right: auto;
+        left: 0;
+    }
+    .construction_nav .click-nav-right-icon {
+        right: auto;
+        left: 60px;
+    }
+    .navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li {
+        text-align: right;
+    }
+    .navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li a {
+        padding: 10px 30px 10px 0px;
+    }
+    .navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+        padding: 10px 30px 10px 0px;
+    }
+    .navbar-area.construction_nav .nav-container .navbar-collapse .navbar-nav li a:hover {
+        color: var(--main-color-one) !important;
+    }
+}
+
+
+/*banner*/
+.construction_bannerWrapper {
+    padding-right: 0;
+    padding-left: 45px;
+}
+
+.construction_bannerbottom__single__icon::before {
+    left: auto;
+    right: 0;
+}
+.construction_bannerbottom__single__icon img {
+    margin-left: 0;
+    margin-right: 20px;
+}
+
+.constructionFaq__contents .constructionFaq__item .constructionFaq__title {
+    padding: 0px 0px 30px 30px;
+}
+
+.constructionFaq__contents .constructionFaq__item .constructionFaq__title::after {
+    right: auto;
+    left: 2px;
+}
+
+.append_project, .append_blog {
+    flex-direction: row-reverse;
+}
+.construction_blog__tag__item:not(:last-child)::after {
+    right: 7px;
+    position: relative;
+}
+
+.construction_footer_widget .footer-contact-single {
+    text-align: right;
+}
+.construction_footer_widget .construction_footer_inner .footer-contact-details {
+    text-align: right;
+}

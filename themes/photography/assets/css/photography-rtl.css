@@ -1,0 +1,102 @@
+.header-info-right ul.user-account {
+    margin-right: 0px;
+    margin-left: 30px;
+}
+.header-top .header-info-right .select-language .nice-select {
+    margin-right: 0px;
+    margin-left: 20px;
+    padding-left: 30px;
+    padding-right: 10px;
+}
+.header-top .header-info-right .select-language .nice-select::after {
+    right: auto;
+    left: 10px;
+}
+.header-top .header-info-left .listing {
+    display: flex;
+    align-items: center;
+}
+.header-top .header-info-left .listing .listItem {
+    margin-right: 0px;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+}
+.header-top .header-info-left .listing .listItem .icon {
+    margin-right: 5px;
+}
+
+.navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li a {
+    padding: 10px 0px 10px 30px;
+}
+
+.navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+    padding: 10px 0px 10px 30px;
+}
+.navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a::after {
+    left: -4px;
+}
+
+.navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children .sub-menu {
+    text-align: right;
+    left: auto;
+    right: 0;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-area.photography_nav .navbar-toggler {
+        right: auto;
+        left: 0;
+    }
+    .photography_nav .click-nav-right-icon {
+        right: auto;
+        left: 60px;
+    }
+    .navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li {
+        text-align: right;
+    }
+    .navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li a,
+    .navbar-area.photography_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+        padding: 15px 20px;
+    }
+    .photography_nav .show-nav-content {
+        margin-left: 0;
+        margin-right: auto;
+    }
+}
+
+/* banner */
+
+.photography_sectionTitle .title__shapes img, .photography_sectionTitle .title__shapes svg {
+    left: auto;
+    right: 100%;
+}
+
+.photography_banner__title__author__thumb__item:not(:first-child) {
+    margin-left: 0;
+    margin-right: -10px;
+}
+
+
+.photography_sectionTitle.text-left {
+    text-align: right;
+}
+
+.append_banner_nav {
+    flex-direction: row-reverse;
+}
+
+.photography_testimonial_appendNav {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.photography_blog__tag__item:not(:last-child)::after {
+    right: auto;
+    left: -7px;
+}
+
+.photography_footer_widget .photography_footer_inner .footer-contact-details {
+    text-align: right;
+}

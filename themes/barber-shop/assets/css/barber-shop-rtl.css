@@ -1,0 +1,157 @@
+
+.barber-shop .header-info-right ul.user-account {
+    margin-right: 0px;
+    margin-left: 20px;
+}
+.barber-shop .header-top .header-info-right .select-language {
+    margin-left: 20px;
+}
+
+.barber-shop .header-top .header-info-left .listing .listItem {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.barber-shop .header-top .header-info-left .listing .listItem .icon {
+    margin-left: 5px;
+    margin-right: 0;
+}
+
+.navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li a,
+.navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+    padding: 10px 0px 10px 30px;
+}
+.navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a::after {
+    display: none;
+}
+
+.navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a::before {
+    content: "\f107";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+    -webkit-transition: all 0.3s ease-in;
+    transition: all 0.3s ease-in;
+    top: 1px;
+    left: -4px;
+    position: relative;
+}
+.navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children .sub-menu {
+    text-align: right;
+    left: auto;
+    right: 0;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-area.barberShop_nav .navbar-toggler {
+        right: auto;
+        left: 0;
+    }
+    .barberShop_nav .click-nav-right-icon {
+        right: auto;
+        left: 60px;
+    }
+    .navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li {
+        text-align: right;
+    }
+    .navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li a,
+    .navbar-area.barberShop_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+        padding: 15px 20px;
+    }
+    .barberShop_nav .show-nav-content {
+        margin-left: 0;
+        margin-right: auto;
+    }
+}
+
+/* contents */
+
+.barberShop_sectionTitle.text-left {
+    text-align: right;
+}
+
+.barberShop_blog__tag__item:not(:last-child)::after {
+    right: auto;
+    left: -7px;
+}
+
+.append_testimonial {
+    flex-direction: row-reverse;
+}
+
+.barberShop_footer_widget .barberShop_footer_inner .footer-contact-details {
+    text-align: right;
+}
+
+.barberShop_footer_widget .barberShop_footer_inner .footer-contact-details {
+    text-align: right;
+}
+
+/* banner */
+
+.barberShop_banner__right__thumb__item__shape {
+    right: auto;
+    left: calc(-100% + 15px);
+    transform: rotateX(180deg);
+}
+
+.barberShop_banner__right__thumb__textShape {
+    left: auto;
+    right: 30px;
+}
+
+.barberShop_banner__content__shapes img {
+    left: auto;
+    right: 0;
+}
+
+.barberShop_banner__content__shapes img:nth-child(2) {
+    left: -40px;
+    right: auto;
+    top: 20px;
+}
+
+.barberShop_banner__content__shapes img:nth-child(3) {
+    left: -40px;
+    right: auto;
+    top: 30%;
+}
+
+.barberShop_banner__schedule__item:not(:last-child) {
+    margin-right: 0;
+    margin-left: 50px;
+}
+
+.barberShop_handsome__thumb__author {
+    right: auto;
+    left: 100px;
+}
+
+.barberShop_discount__shapes img:nth-child(1) {
+    left: auto;
+    right: 20px;
+}
+.barberShop_discount__shapes img:nth-child(2) {
+    right: auto;
+    left: 20px;
+}
+
+.barberShop_blog__tag {
+    right: auto;
+    left: 10px;
+}
+
+.barberShop_banner__appointment__shape img:nth-child(1) {
+    top: 25%;
+    right: auto;
+    left: 45%;
+}
+
+.barberShop__bookingInfo__billing__list {
+    padding: 0;
+}
+.barberShop_footer_area .footer-widget .listing-info .icon {
+    margin-right: 0px;
+    margin-left: 5px;
+}

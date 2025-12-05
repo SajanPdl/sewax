@@ -1,0 +1,123 @@
+.header-info-right ul.user-account {
+    margin-right: 0px;
+    margin-left: 30px;
+}
+.header-top .header-info-right .select-language .nice-select {
+    margin-right: 0px;
+    margin-left: 20px;
+    padding-left: 30px;
+    padding-right: 10px;
+}
+.header-top .header-info-right .select-language .nice-select::after {
+    right: auto;
+    left: 10px;
+}
+.header-top .header-info-left .listing {
+    display: flex;
+    align-items: center;
+}
+.header-top .header-info-left .listing .listItem {
+    margin-right: 0px;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    flex-direction: row-reverse;
+}
+.header-top .header-info-left .listing .listItem .icon {
+    margin-right: 5px;
+}
+
+.navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li a {
+    padding: 10px 0px 10px 30px;
+}
+
+.navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+    padding: 10px 0px 10px 30px;
+}
+.navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a::after {
+    left: -4px;
+}
+
+.navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children .sub-menu {
+    text-align: right;
+    left: auto;
+    right: 0;
+}
+
+@media only screen and (max-width: 991px) {
+    .navbar-area.softwareFirm_nav .navbar-toggler {
+        right: auto;
+        left: 0;
+    }
+    .softwareFirm_nav .click-nav-right-icon {
+        right: auto;
+        left: 60px;
+    }
+    .navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li {
+        text-align: right;
+    }
+    .navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li a,
+    .navbar-area.softwareFirm_nav .nav-container .navbar-collapse .navbar-nav li.menu-item-has-children > a {
+        padding: 15px 20px;
+    }
+    .softwareFirm_nav .show-nav-content {
+        margin-left: 0;
+        margin-right: auto;
+    }
+}
+
+/* banner */
+
+.softwareFirm_banner__reviewer__thumb:not(:first-child) {
+    margin-left: 0;
+    margin-right: -10px;
+}
+
+.softwareFirm_banner__right__thumb__shape {
+    right: auto;
+    left: -20px;
+}
+
+.softwareFirm_business__wrapper {
+    padding-left: 0;
+    padding-right: 90px;
+}
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+    .softwareFirm_business__wrapper {
+        padding-left: 0;
+        padding-right: 50px;
+    }
+}
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .softwareFirm_business__wrapper {
+        padding-left: 0;
+        padding-right: 30px;
+    }
+}
+@media (min-width: 300px) and (max-width: 991.98px) {
+    .softwareFirm_business__wrapper {
+        padding-left: 0;
+        padding-right: 0px;
+    }
+}
+.softwareFirm_sectionTitle.text-left {
+    text-align: right;
+}
+
+.softwareFirm_blog__tag__item:not(:last-child)::after {
+    right: auto;
+    left: -7px;
+}
+
+.append_testimonial {
+    flex-direction: row-reverse;
+}
+
+.softwareFirm_footer_widget .softwareFirm_footer_inner .footer-contact-details {
+    text-align: right;
+}
+
+.progressParent {
+    right: auto;
+    left: 30px;
+}

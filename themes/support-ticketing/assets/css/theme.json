@@ -1,0 +1,35 @@
+{
+    "name": "Support Ticketing",
+    "slug": "job-find",
+    "description": "Support Ticketing Theme",
+    "author": "Al Ahsan",
+    "version": "1.0.0",
+    "is_available": true,
+    "status": true,
+    "screenshot": [
+        {
+            "primary": "primary.jpg"
+        }
+    ],
+    "headerHook": [
+        {
+            "style": [
+                "support-ticketing-main-style"
+            ],
+            "rtl_style": [
+                "support-ticketing-rtl"
+            ],
+            "script": [],
+            "blade": []
+        }
+    ],
+    "footerHook": [
+        {
+            "style": [],
+            "script": [
+                "main"
+            ],
+            "blade": []
+        }
+    ]
+}
