@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { Search, Upload, FileCode, CheckCircle, Eye, Trash2, Loader2, X, Save, RefreshCw, Terminal, AlertTriangle, Play, Smartphone, Monitor, Sparkles, ExternalLink, Zap } from 'lucide-react';
@@ -117,45 +116,52 @@ export const TemplateManager: React.FC = () => {
           
           const htmlResponse = await ai.models.generateContent({
               model: 'gemini-3-pro-preview',
-              contents: `You are an Expert UI Engineer & Design System Architect. Your task is to reconstruct a legacy PHP/Blade theme into a modern, high-performance HTML5 landing page using Tailwind CSS.
+              contents: `You are an Expert Senior Frontend Engineer & UI/UX Designer specialized in migrating legacy systems to modern stacks.
+              Your task is to convert a PHP/Blade theme structure into a single, production-ready HTML5 landing page using Tailwind CSS via CDN.
 
               CONTEXT:
               ${promptContext}
 
-              DESIGN SYSTEM & REQUIREMENTS:
-              1. **Visual Style**:
-                 - Use a modern, clean aesthetic (think Linear, Vercel, or Airbnb design).
-                 - Typography: Use Google Fonts (Inter or Plus Jakarta Sans).
-                 - Colors: Derive a primary color palette from the theme name/category (e.g., 'Restaurant' -> Warm Orange/Red, 'Corporate' -> Trust Blue).
-                 - Effects: Use subtle shadows ('shadow-lg'), rounded corners ('rounded-2xl'), and gradients.
-                 - Interactivity: Add hover states ('hover:scale-105', 'transition-all', 'duration-300') to buttons and cards.
+              CORE OBJECTIVE:
+              Create a visually stunning, responsive, and interactive landing page that feels like a premium SaaS or modern business site. It must look significantly better than the original legacy theme.
 
-              2. **Structure & Component Mapping**:
-                 - **Header/Nav** (from navbar.blade.php): Sticky top, glassmorphism ('bg-white/80 backdrop-blur-md'), responsive mobile menu icon.
-                 - **Hero Section** (from breadcrumb.blade.php): Full viewport height or large padding, compelling headline, primary CTA button, background image or gradient overlay.
-                 - **Content Sections**:
-                    - Features/Services Grid: 3-column layout on desktop with icons.
-                    - About/Story: Text + Image split layout.
-                    - Industry Specifics:
-                        * Restaurant: Menu grid with prices and images.
-                        * Travel: Itinerary timeline or tour cards.
-                        * E-commerce: Product carousel mock.
-                 - **Footer** (from widget-area.blade.php): Multi-column links, newsletter signup, copyright.
+              STRICT DESIGN SYSTEM & REQUIREMENTS:
 
-              3. **Technical Specs**:
-                 - Output STRICTLY valid HTML5.
-                 - Load Tailwind via CDN: <script src="https://cdn.tailwindcss.com"></script>.
-                 - Load Fonts: <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">.
-                 - Use semantic tags (<header>, <main>, <section>, <footer>).
-                 - Ensure images use high-quality Unsplash URLs relevant to the context (e.g., 'source.unsplash.com/random/800x600?nepal,mountain').
+              1. **Visual Language (Modern & Polished)**:
+                 - **Typography**: Use 'Inter' or 'Plus Jakarta Sans'. Headings must be bold and tight (tracking-tight).
+                 - **Spacing**: Use ample whitespace (p-8, py-20, gap-8). Avoid cramped layouts.
+                 - **Components**: Use "Glassmorphism" where appropriate (bg-white/70 backdrop-blur-lg).
+                 - **Shadows**: Use soft, diffused shadows (shadow-xl, shadow-primary-500/10).
+                 - **Radius**: Use rounded-2xl or rounded-3xl for cards and buttons.
 
-              4. **Output Format**:
-                 - Return ONLY the raw HTML code. Do not wrap in markdown code blocks. Start directly with <!DOCTYPE html>.
+              2. **Component Mapping (PHP -> Modern UI)**:
+                 - **'navbar.blade.php'** -> **<header>**: Fixed/Sticky top, transparent-to-white on scroll style. Must have a logo, navigation links, and a CTA button.
+                 - **'breadcrumb.blade.php'** -> **Hero Section**: This is the most important section. Use a full-width background image with overlay, or a split layout with a large 3D/Illustration. Large H1, subtext, and two buttons (Primary & Ghost).
+                 - **'widget-area.blade.php'** -> **Footer**: 4-column layout. Brand column, Links column, Resources column, Newsletter column.
+
+              3. **Industry-Specific Intelligence**:
+                 - If **Restaurant**: Include a "Popular Dishes" grid with food images and price tags. Add a "Book Table" sticky button.
+                 - If **Travel**: Include "Featured Destinations" cards with hover-zoom effects on images.
+                 - If **E-commerce**: Include a "Trending Products" carousel/grid with "Add to Cart" buttons.
+                 - If **Agency**: Include a "Our Work" portfolio grid and "Client Logos" strip.
+
+              4. **Technical & Accessibility**:
+                 - **Responsive**: Mobile-first approach. Use 'md:flex-row', 'lg:grid-cols-3'.
+                 - **Images**: Use consistent aspect ratios. Use Unsplash source URLs with relevant keywords (e.g. 'source.unsplash.com/random/800x600?nature,travel').
+                 - **Icons**: Use simple inline SVGs for critical icons (Menu, Arrow, Star).
+                 - **Framework**: Tailwind CSS via CDN is MANDATORY. <script src="https://cdn.tailwindcss.com"></script>.
+
+              5. **Output Format**:
+                 - Return ONLY the raw HTML string starting with <!DOCTYPE html>.
+                 - Do NOT include markdown fences like \`\`\`html.
+                 - Do NOT include explanations.
 
               THINKING PROCESS:
-              - Assess the vibe: Is it luxury, rugged, playful, or professional?
-              - Define the grid system and spacing.
-              - Write the HTML structure with embedded Tailwind classes.`,
+              1. Analyze the requested Theme Name & Category.
+              2. Determine the color palette (Primary, Secondary, Background).
+              3. Draft the Hero section structure (Center vs Split).
+              4. Plan the Feature/Content sections based on the category.
+              5. Write the code, ensuring every class is a valid Tailwind utility.`,
               config: {
                   thinkingConfig: { thinkingBudget: 32768 }
               }
@@ -613,4 +619,102 @@ export const TemplateManager: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Manual Upload */}
-                  <div className="border-2 border-dashed border-neutral-600 rounded-xl p-12 text-center hover:border-primary-500 transition-colors bg-neutral-
+                  <div className="border-2 border-dashed border-neutral-600 rounded-xl p-12 text-center hover:border-primary-500 transition-colors bg-neutral-900/50 flex flex-col items-center justify-center h-full">
+                      <FileCode className="w-12 h-12 text-neutral-500 mb-4" />
+                      <p className="text-neutral-300 font-medium mb-2">Drag and drop your PHP/HTML theme</p>
+                      <p className="text-neutral-500 text-sm mb-6">Supports .zip files containing .php, .blade.php, .html</p>
+                      <input 
+                          type="file" 
+                          accept=".zip"
+                          className="hidden" 
+                          id="theme-upload"
+                          onChange={(e) => {
+                              if(e.target.files?.[0]) setUploadFile(e.target.files[0]);
+                          }}
+                      />
+                      {!uploadFile ? (
+                          <label htmlFor="theme-upload" className="cursor-pointer bg-neutral-700 hover:bg-neutral-600 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                              Select File
+                          </label>
+                      ) : (
+                          <div className="w-full max-w-xs">
+                              <div className="flex items-center gap-3 bg-neutral-800 p-3 rounded-lg border border-neutral-700 mb-4 text-left">
+                                  <div className="p-2 bg-primary-900/30 rounded text-primary-400"><FileCode className="w-5 h-5"/></div>
+                                  <div className="flex-1 truncate text-white text-sm">{uploadFile.name}</div>
+                                  <button onClick={() => setUploadFile(null)} className="text-neutral-500 hover:text-white"><X className="w-4 h-4"/></button>
+                              </div>
+                              <Button onClick={(e) => handleFileUpload(e)} className="w-full" isLoading={isStarting}>
+                                 Start Processing
+                              </Button>
+                          </div>
+                      )}
+                  </div>
+
+                  {/* Quick Start / Demo */}
+                  <div className="bg-neutral-900/50 rounded-xl border border-neutral-700 p-6 flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-yellow-500/20 rounded-lg text-yellow-500"><Zap className="w-5 h-5" /></div>
+                          <h4 className="text-white font-bold">Quick Start Demos</h4>
+                      </div>
+                      <p className="text-neutral-400 text-sm mb-6">
+                          Don't have a zip file? Generate a full template from our curated presets using Gemini 3.0 Pro.
+                      </p>
+                      <button 
+                        onClick={(e) => handleFileUpload(e, demoContext)}
+                        className="flex items-center gap-4 p-4 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-primary-500 hover:bg-neutral-800/80 transition-all text-left group"
+                      >
+                          <img src={demoContext.image_url} className="w-16 h-12 object-cover rounded" alt="Demo" />
+                          <div>
+                              <div className="text-white font-bold group-hover:text-primary-400 transition-colors">{demoContext.name}</div>
+                              <div className="text-xs text-neutral-500">{demoContext.category} Template</div>
+                          </div>
+                      </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {loading ? (
+          <div className="p-12 text-center text-white"><Loader2 className="w-8 h-8 animate-spin mx-auto mb-4"/>Loading Registry...</div>
+      ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+             {templates.length === 0 && <div className="col-span-3 text-center py-12 text-neutral-500">No templates published yet.</div>}
+             {templates.map((template) => (
+                <div key={template.id} className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden group hover:border-neutral-600 transition-all">
+                   <div className="h-48 relative bg-neutral-900 overflow-hidden">
+                      {template.image_url && <img src={template.image_url} alt={template.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />}
+                      <div className="absolute top-2 right-2 bg-neutral-900/80 backdrop-blur px-2 py-1 rounded text-xs font-mono text-neutral-300 border border-neutral-700">
+                          v{template.current_version}
+                      </div>
+                   </div>
+                   <div className="p-5">
+                      <div className="flex justify-between items-start mb-2">
+                         <h3 className="font-bold text-white text-lg">{template.name}</h3>
+                      </div>
+                      <p className="text-sm text-neutral-400 line-clamp-2 mb-4">{template.description}</p>
+                      
+                      <div className="flex items-center gap-2 mb-4">
+                         <span className="px-2 py-1 rounded bg-neutral-700 text-neutral-300 text-xs font-medium uppercase tracking-wide">{template.category}</span>
+                         <span className={`px-2 py-1 rounded text-xs font-medium flex items-center gap-1 uppercase tracking-wide ${
+                             template.status === 'published' ? 'bg-green-900/30 text-green-400 border border-green-900/50' : 'bg-yellow-900/30 text-yellow-400 border border-yellow-900/50'
+                         }`}>
+                             {template.status}
+                         </span>
+                      </div>
+    
+                      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-neutral-700">
+                         <button className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-neutral-700 text-white text-sm hover:bg-neutral-600 transition-colors" onClick={() => handlePreview(template)}>
+                            <Eye className="w-4 h-4" /> Preview
+                         </button>
+                         <button className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-red-900/30 text-red-400 text-sm hover:bg-red-900/20 transition-colors">
+                            <Trash2 className="w-4 h-4" /> Archive
+                         </button>
+                      </div>
+                   </div>
+                </div>
+             ))}
+          </div>
+      )}
+    </div>
+  );
+};
