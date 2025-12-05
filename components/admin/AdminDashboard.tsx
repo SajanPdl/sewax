@@ -1,27 +1,52 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Users, Building, DollarSign, Activity, ArrowUp, ArrowDown, 
   Server, AlertOctagon, FileWarning, Clock
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { supabase } from '../../lib/supabase/client';
 
 export const AdminDashboard: React.FC = () => {
+  const [metrics, setMetrics] = useState({
+     tenants: 0,
+     users: 0,
+     revenue: 0,
+     tickets: 0
+  });
+
+  useEffect(() => {
+     const fetchData = async () => {
+        // Use RPC for optimized fetching of dashboard stats
+        const { data, error } = await supabase.rpc('get_admin_dashboard_stats');
+        
+        if (data && !error) {
+           setMetrics({
+              tenants: data.tenants || 0,
+              users: data.users || 0,
+              revenue: data.revenue || 0,
+              tickets: data.tickets || 0
+           });
+        }
+     };
+     fetchData();
+  }, []);
+
   const serverStats = [
-    { label: 'CPU Load', value: '42%', status: 'normal' },
-    { label: 'Memory', value: '64%', status: 'warning' },
+    { label: 'CPU Load', value: '12%', status: 'normal' },
+    { label: 'Memory', value: '34%', status: 'normal' },
     { label: 'Storage', value: '28%', status: 'normal' },
     { label: 'API Latency', value: '45ms', status: 'normal' },
   ];
 
+  // Mock data for chart as historical data requires complex query
   const data = [
-    { name: 'Mon', signups: 12, revenue: 1200 },
-    { name: 'Tue', signups: 19, revenue: 2100 },
-    { name: 'Wed', signups: 15, revenue: 1600 },
-    { name: 'Thu', signups: 22, revenue: 2800 },
-    { name: 'Fri', signups: 30, revenue: 3400 },
-    { name: 'Sat', signups: 25, revenue: 2900 },
-    { name: 'Sun', signups: 35, revenue: 4100 },
+    { name: 'Mon', revenue: 1200 },
+    { name: 'Tue', revenue: 2100 },
+    { name: 'Wed', revenue: 1600 },
+    { name: 'Thu', revenue: 2800 },
+    { name: 'Fri', revenue: 3400 },
+    { name: 'Sat', revenue: 2900 },
+    { name: 'Sun', revenue: 4100 },
   ];
 
   return (
@@ -34,7 +59,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="flex gap-2">
            <span className="flex items-center gap-2 px-3 py-1 bg-green-900/20 text-green-400 border border-green-900/30 rounded-full text-sm font-medium">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              All Systems Operational
+              System Operational
            </span>
         </div>
       </div>
@@ -42,10 +67,10 @@ export const AdminDashboard: React.FC = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
          {[
-           { label: 'Total Tenants', value: '1,240', change: '+12%', icon: Building, color: 'text-blue-400' },
-           { label: 'Total Users', value: '3,850', change: '+8%', icon: Users, color: 'text-purple-400' },
-           { label: 'MRR', value: 'NPR 850k', change: '+15%', icon: DollarSign, color: 'text-green-400' },
-           { label: 'Active Tickets', value: '42', change: '-5', icon: Activity, color: 'text-yellow-400' },
+           { label: 'Total Tenants', value: metrics.tenants.toString(), change: '+2', icon: Building, color: 'text-blue-400' },
+           { label: 'Total Users', value: metrics.users.toString(), change: '+5', icon: Users, color: 'text-purple-400' },
+           { label: 'Total Revenue', value: `NPR ${(metrics.revenue/1000).toFixed(1)}k`, change: '+15%', icon: DollarSign, color: 'text-green-400' },
+           { label: 'Open Tickets', value: metrics.tickets.toString(), change: '0', icon: Activity, color: 'text-yellow-400' },
          ].map((stat, i) => (
            <div key={i} className="bg-neutral-800 border border-neutral-700 p-6 rounded-xl">
               <div className="flex justify-between items-start mb-4">
@@ -57,13 +82,6 @@ export const AdminDashboard: React.FC = () => {
                     <stat.icon className="w-5 h-5" />
                  </div>
               </div>
-              <div className="flex items-center text-xs">
-                 <span className={`font-bold ${stat.change.startsWith('+') ? 'text-green-500' : 'text-red-500'} flex items-center`}>
-                    {stat.change.startsWith('+') ? <ArrowUp className="w-3 h-3 mr-1" /> : <ArrowDown className="w-3 h-3 mr-1" />}
-                    {stat.change}
-                 </span>
-                 <span className="text-neutral-500 ml-2">vs last month</span>
-              </div>
            </div>
          ))}
       </div>
@@ -71,7 +89,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="grid lg:grid-cols-3 gap-8">
          {/* Main Chart */}
          <div className="lg:col-span-2 bg-neutral-800 border border-neutral-700 rounded-xl p-6">
-            <h3 className="text-lg font-bold text-white mb-6">Revenue & Growth</h3>
+            <h3 className="text-lg font-bold text-white mb-6">Revenue Trend (Last 7 Days)</h3>
             <div className="h-80 w-full">
                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data}>
@@ -118,58 +136,16 @@ export const AdminDashboard: React.FC = () => {
             <div className="mt-8 pt-6 border-t border-neutral-700">
                <h4 className="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-4">Live Alerts</h4>
                <div className="space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-red-900/20 border border-red-900/50 rounded-lg">
-                     <AlertOctagon className="w-4 h-4 text-red-500 mt-0.5" />
+                  <div className="flex items-start gap-3 p-3 bg-neutral-900 border border-neutral-700 rounded-lg">
+                     <AlertOctagon className="w-4 h-4 text-green-500 mt-0.5" />
                      <div>
-                        <p className="text-sm font-bold text-red-200">Payment Gateway Error</p>
-                        <p className="text-xs text-red-400 mt-0.5">High failure rate on Khalti endpoint.</p>
-                     </div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-yellow-900/20 border border-yellow-900/50 rounded-lg">
-                     <FileWarning className="w-4 h-4 text-yellow-500 mt-0.5" />
-                     <div>
-                        <p className="text-sm font-bold text-yellow-200">Storage Warning</p>
-                        <p className="text-xs text-yellow-400 mt-0.5">S3 Bucket 'sewax-assets' reaching capacity.</p>
+                        <p className="text-sm font-bold text-gray-300">System Nominal</p>
+                        <p className="text-xs text-gray-500 mt-0.5">No active alerts.</p>
                      </div>
                   </div>
                </div>
             </div>
          </div>
-      </div>
-      
-      {/* Recent Audit Logs */}
-      <div className="bg-neutral-800 border border-neutral-700 rounded-xl overflow-hidden">
-         <div className="px-6 py-4 border-b border-neutral-700 flex justify-between items-center">
-            <h3 className="font-bold text-white">Recent Admin Activity</h3>
-            <button className="text-xs text-primary-400 hover:text-primary-300">View Audit Log</button>
-         </div>
-         <table className="w-full text-sm text-left">
-            <thead className="bg-neutral-900 text-neutral-500 font-medium border-b border-neutral-700">
-               <tr>
-                  <th className="px-6 py-3">Admin</th>
-                  <th className="px-6 py-3">Action</th>
-                  <th className="px-6 py-3">Target</th>
-                  <th className="px-6 py-3 text-right">Time</th>
-               </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-700 text-neutral-300">
-               {[
-                  { admin: 'Sudeep K.', action: 'Suspended Tenant', target: 'Spam Co.', time: '10m ago' },
-                  { admin: 'System', action: 'Auto-Renew', target: 'Himalayan Coffee', time: '1h ago' },
-                  { admin: 'Priya S.', action: 'Refunded Payment', target: 'INV-2049', time: '2h ago' },
-                  { admin: 'Sudeep K.', action: 'Updated Plan', target: 'Agency Tier', time: '5h ago' },
-               ].map((log, i) => (
-                  <tr key={i} className="hover:bg-neutral-700/50 transition-colors">
-                     <td className="px-6 py-3 font-medium text-white">{log.admin}</td>
-                     <td className="px-6 py-3">{log.action}</td>
-                     <td className="px-6 py-3 font-mono text-xs text-neutral-400">{log.target}</td>
-                     <td className="px-6 py-3 text-right text-neutral-500 flex items-center justify-end gap-1">
-                        <Clock className="w-3 h-3" /> {log.time}
-                     </td>
-                  </tr>
-               ))}
-            </tbody>
-         </table>
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Building2, CreditCard, Shield, 
   Palette, Globe, Database, Server, Headphones, FileText, 
   BarChart3, Settings, LogOut, Search, Bell, Terminal,
-  Flag, Lock, HardDrive, RefreshCw, Layers, Activity
+  Flag, Lock, HardDrive, RefreshCw, Layers, Activity, 
+  Megaphone, Rocket
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -54,6 +54,8 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         { icon: Headphones, label: 'Support Tickets', path: '/admin/support' },
         { icon: Database, label: 'Audit Logs', path: '/admin/audit' },
         { icon: Layers, label: 'Jobs & Queues', path: '/admin/jobs' },
+        { icon: Rocket, label: 'Deployments', path: '/admin/deploys' },
+        { icon: Megaphone, label: 'Announcements', path: '/admin/announcements' },
         { icon: Lock, label: 'Security', path: '/admin/security' },
         { icon: RefreshCw, label: 'Backups', path: '/admin/backups' },
       ]

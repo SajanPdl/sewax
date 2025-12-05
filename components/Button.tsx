@@ -9,6 +9,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
   className?: string;
   disabled?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  type?: "button" | "submit" | "reset";
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -18,6 +19,7 @@ export const Button: React.FC<ButtonProps> = ({
   isLoading,
   className = '',
   disabled,
+  type = 'button',
   ...props
 }) => {
   const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
@@ -41,6 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
       whileTap={{ scale: 0.98 }}
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={isLoading || disabled}
+      type={type}
       {...props}
     >
       {isLoading ? (

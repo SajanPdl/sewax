@@ -1,17 +1,70 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Search, Plus, Filter, MoreHorizontal, AlertCircle, Package } from 'lucide-react';
-import { Product } from '../../types';
+import { Search, Plus, Filter, MoreHorizontal, AlertCircle, Loader2, Trash2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase/client';
+import { useAuth } from '../auth/AuthProvider';
 
 export const Products: React.FC = () => {
-  const products: Product[] = [
-    { id: '1', title: 'Himalayan Arabica Coffee Beans (500g)', price: 1500, inventory: 45, sku: 'COF-001', category: 'Coffee', image: 'https://picsum.photos/200/200?random=201', status: 'Active' },
-    { id: '4', title: 'Reusable Coffee Filter', price: 1200, inventory: 5, sku: 'FIL-004', category: 'Equipment', image: 'https://picsum.photos/200/200?random=204', status: 'Low Stock' },
-    { id: '2', title: 'Ilam Green Tea Pack', price: 850, inventory: 120, sku: 'TEA-002', category: 'Tea', image: 'https://picsum.photos/200/200?random=202', status: 'Active' },
-    { id: '5', title: 'Espresso Blend', price: 1800, inventory: 50, sku: 'COF-005', category: 'Coffee', image: 'https://picsum.photos/200/200?random=205', status: 'Active' },
-    { id: '6', title: 'Organic Honey', price: 950, inventory: 0, sku: 'HON-006', category: 'Food', image: 'https://picsum.photos/200/200?random=206', status: 'Draft' },
-  ];
+  const { tenant } = useAuth();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+
+  const fetchProducts = async () => {
+    if (!tenant) return;
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('tenant_id', tenant.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) setProducts(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, [tenant]);
+
+  const handleAddProduct = async () => {
+    if (!tenant) return;
+    setIsCreating(true);
+    // For this demo, we create a placeholder product that can be edited later
+    const { error } = await supabase.from('products').insert({
+       tenant_id: tenant.id,
+       title: 'New Product ' + Math.floor(Math.random() * 1000),
+       price: 1000,
+       inventory: 10,
+       status: 'Active',
+       sku: 'SKU-' + Math.floor(Math.random() * 10000),
+       category: 'General'
+    });
+
+    if (error) {
+       alert('Failed to create product: ' + error.message);
+    } else {
+       await fetchProducts();
+    }
+    setIsCreating(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (!error) {
+      setProducts(products.filter(p => p.id !== id));
+    }
+  };
+
+  const filteredProducts = products.filter(p => 
+    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.sku?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -20,8 +73,8 @@ export const Products: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Products</h1>
              <p className="text-gray-500">Manage your inventory, pricing, and collections.</p>
           </div>
-          <Button className="flex items-center gap-2">
-             <Plus className="w-4 h-4" /> Add Product
+          <Button onClick={handleAddProduct} isLoading={isCreating} className="flex items-center gap-2">
+             <Plus className="w-4 h-4" /> Quick Add Product
           </Button>
        </div>
 
@@ -29,7 +82,13 @@ export const Products: React.FC = () => {
        <div className="bg-white p-4 rounded-xl border border-gray-200 mb-6 flex gap-4 shadow-sm items-center">
           <div className="relative flex-1">
              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-             <input type="text" placeholder="Search products..." className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-100" />
+             <input 
+               type="text" 
+               placeholder="Search products..." 
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+               className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-100" 
+             />
           </div>
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50">
              <Filter className="w-4 h-4" /> Filter
@@ -50,12 +109,16 @@ export const Products: React.FC = () => {
                 </tr>
              </thead>
              <tbody className="divide-y divide-gray-100">
-                {products.map(product => (
+                {filteredProducts.map(product => (
                    <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden border border-gray-200">
-                               <img src={product.image} alt="" className="w-full h-full object-cover" />
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden border border-gray-200 flex items-center justify-center text-gray-300">
+                               {product.image_url ? (
+                                 <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+                               ) : (
+                                 <div className="text-xs">No Img</div>
+                               )}
                             </div>
                             <div>
                                <p className="font-bold text-gray-900">{product.title}</p>
@@ -80,25 +143,31 @@ export const Products: React.FC = () => {
                       </td>
                       <td className="px-6 py-4">
                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                            {product.category}
+                            {product.category || 'Uncategorized'}
                          </span>
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900">NPR {product.price.toLocaleString()}</td>
+                      <td className="px-6 py-4 font-medium text-gray-900">NPR {product.price?.toLocaleString()}</td>
                       <td className="px-6 py-4 text-right">
-                         <button className="text-gray-400 hover:text-gray-600 p-1 rounded hover:bg-gray-100 transition-colors">
-                            <MoreHorizontal className="w-4 h-4" />
+                         <button 
+                            onClick={() => handleDelete(product.id)}
+                            className="text-gray-400 hover:text-red-600 p-1 rounded hover:bg-gray-100 transition-colors"
+                         >
+                            <Trash2 className="w-4 h-4" />
                          </button>
                       </td>
                    </tr>
                 ))}
+                {filteredProducts.length === 0 && (
+                   <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                         No products found. Add some to get started!
+                      </td>
+                   </tr>
+                )}
              </tbody>
           </table>
           <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-             <p className="text-xs text-gray-500">Showing 5 of 45 products</p>
-             <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="h-8 text-xs bg-white">Previous</Button>
-                <Button variant="outline" size="sm" className="h-8 text-xs bg-white">Next</Button>
-             </div>
+             <p className="text-xs text-gray-500">Showing {filteredProducts.length} products</p>
           </div>
        </div>
     </div>

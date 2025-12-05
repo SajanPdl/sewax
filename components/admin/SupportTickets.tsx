@@ -1,90 +1,97 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
-import { Search, Filter, MessageSquare, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Filter, Clock, AlertCircle, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '../../lib/supabase/client';
 
 export const SupportTickets: React.FC = () => {
-  const tickets = [
-    { id: '#4092', subject: 'Domain verification failed', user: 'Ramesh G.', priority: 'High', status: 'Open', agent: 'Unassigned', time: '10m ago' },
-    { id: '#4091', subject: 'How to change theme colors?', user: 'Sita M.', priority: 'Low', status: 'Open', agent: 'Priya (Admin)', time: '45m ago' },
-    { id: '#4090', subject: 'Billing invoice incorrect', user: 'Hari B.', priority: 'Medium', status: 'Escalated', agent: 'Finance Team', time: '2h ago' },
-    { id: '#4089', subject: 'Feature request: Dark mode', user: 'John D.', priority: 'Low', status: 'Closed', agent: 'Sudeep (Owner)', time: '1d ago' },
-  ];
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTickets = async () => {
+     const { data } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .order('created_at', { ascending: false });
+     if (data) setTickets(data);
+     setLoading(false);
+  };
+
+  useEffect(() => {
+     fetchTickets();
+  }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+     await supabase.from('support_tickets').update({ status }).eq('id', id);
+     fetchTickets();
+  };
+
+  if (loading) return <div className="p-12 text-center text-white"><Loader2 className="w-8 h-8 animate-spin mx-auto mb-4"/>Loading Tickets...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
          <div>
             <h1 className="text-2xl font-bold text-white">Support Inbox</h1>
-            <p className="text-neutral-400">Manage customer tickets and help requests.</p>
-         </div>
-         <div className="flex gap-2">
-            <span className="px-3 py-1 bg-neutral-800 rounded-full text-xs text-neutral-400 border border-neutral-700">Open: <span className="text-white font-bold">12</span></span>
-            <span className="px-3 py-1 bg-neutral-800 rounded-full text-xs text-neutral-400 border border-neutral-700">Avg Response: <span className="text-green-400 font-bold">1h 20m</span></span>
+            <p className="text-neutral-400">Real-time support requests.</p>
          </div>
       </div>
 
       <div className="bg-neutral-800 rounded-xl border border-neutral-700 overflow-hidden flex flex-col h-[600px]">
-         {/* Toolbar */}
-         <div className="p-4 border-b border-neutral-700 flex gap-4">
-             <div className="relative flex-1">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 w-4 h-4" />
-                 <input 
-                   type="text" 
-                   placeholder="Search tickets..." 
-                   className="w-full bg-neutral-900 border border-neutral-700 rounded-lg pl-10 pr-4 py-2 text-sm text-white focus:outline-none focus:border-primary-500"
-                 />
-             </div>
-             <Button variant="outline" className="border-neutral-700 text-neutral-300 hover:bg-neutral-700">
-                <Filter className="w-4 h-4 mr-2" /> Filter
-             </Button>
-         </div>
-
-         {/* Ticket List */}
          <div className="flex-1 overflow-y-auto">
              <table className="w-full text-sm text-left">
                 <thead className="bg-neutral-900 text-neutral-500 font-medium border-b border-neutral-700 sticky top-0 z-10">
                    <tr>
                       <th className="px-6 py-3 w-20">ID</th>
-                      <th className="px-6 py-3">Subject & User</th>
+                      <th className="px-6 py-3">Subject</th>
                       <th className="px-6 py-3">Priority</th>
                       <th className="px-6 py-3">Status</th>
-                      <th className="px-6 py-3">Assignee</th>
-                      <th className="px-6 py-3 text-right">Created</th>
+                      <th className="px-6 py-3 text-right">Actions</th>
                    </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-700 text-neutral-300">
                    {tickets.map(ticket => (
-                      <tr key={ticket.id} className="hover:bg-neutral-700/30 cursor-pointer transition-colors">
-                         <td className="px-6 py-4 font-mono text-xs text-neutral-500">{ticket.id}</td>
+                      <tr key={ticket.id} className="hover:bg-neutral-700/30 transition-colors">
+                         <td className="px-6 py-4 font-mono text-xs text-neutral-500">{ticket.id.slice(0,6)}</td>
                          <td className="px-6 py-4">
                             <p className="font-bold text-white mb-0.5">{ticket.subject}</p>
-                            <p className="text-xs text-neutral-500">{ticket.user}</p>
+                            <p className="text-xs text-neutral-500 truncate max-w-xs">{ticket.description}</p>
                          </td>
                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold ${
-                               ticket.priority === 'High' ? 'text-red-400 bg-red-900/20' : 
-                               ticket.priority === 'Medium' ? 'text-yellow-400 bg-yellow-900/20' : 
-                               'text-blue-400 bg-blue-900/20'
-                            }`}>
-                               {ticket.priority === 'High' && <AlertCircle className="w-3 h-3" />}
-                               {ticket.priority}
-                            </span>
+                            <span className={`text-xs font-bold px-2 py-1 rounded ${
+                               ticket.priority === 'High' ? 'bg-red-900/30 text-red-400' : 'bg-neutral-700 text-neutral-300'
+                            }`}>{ticket.priority}</span>
                          </td>
                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ${
-                               ticket.status === 'Open' ? 'text-green-400 border-green-900/30 bg-green-900/10' :
-                               ticket.status === 'Closed' ? 'text-neutral-500 border-neutral-700 bg-neutral-800' :
-                               'text-orange-400 border-orange-900/30 bg-orange-900/10'
-                            }`}>
-                               {ticket.status === 'Open' ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
-                               {ticket.status}
-                            </span>
+                            <span className={`text-xs ${
+                               ticket.status === 'Resolved' ? 'text-green-400' : 'text-yellow-400'
+                            }`}>{ticket.status}</span>
                          </td>
-                         <td className="px-6 py-4 text-xs text-neutral-400">{ticket.agent}</td>
-                         <td className="px-6 py-4 text-right text-neutral-500 text-xs">{ticket.time}</td>
+                         <td className="px-6 py-4 text-right flex justify-end gap-2">
+                            {ticket.status !== 'Resolved' && (
+                               <button 
+                                  onClick={() => updateStatus(ticket.id, 'Resolved')}
+                                  className="text-green-500 hover:bg-neutral-700 p-1 rounded" 
+                                  title="Mark Resolved"
+                               >
+                                  <CheckCircle className="w-4 h-4"/>
+                               </button>
+                            )}
+                             <button 
+                                onClick={() => updateStatus(ticket.id, 'Closed')}
+                                className="text-neutral-500 hover:text-red-400 hover:bg-neutral-700 p-1 rounded" 
+                                title="Close"
+                             >
+                                <XCircle className="w-4 h-4"/>
+                             </button>
+                         </td>
                       </tr>
                    ))}
+                   {tickets.length === 0 && (
+                      <tr>
+                         <td colSpan={5} className="p-8 text-center text-neutral-500">No tickets found.</td>
+                      </tr>
+                   )}
                 </tbody>
              </table>
          </div>

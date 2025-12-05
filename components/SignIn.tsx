@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase/client';
 import { Button } from './Button';
-import { ArrowLeft, Mail, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Loader2, PlayCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
@@ -13,10 +13,33 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const handleDemoLogin = () => {
+     setIsLoading(true);
+     // Simulate network delay
+     setTimeout(() => {
+        localStorage.setItem('sewax-demo-mode', 'true');
+        // Force reload to trigger AuthProvider demo check
+        window.location.href = '/#/dashboard';
+        window.location.reload();
+     }, 800);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // DEMO SHORTCUTS
+    if (email === 'admin@sewax.com' && password === 'admin123') {
+       navigate('/admin/dashboard');
+       setIsLoading(false);
+       return;
+    }
+
+    if (email === 'demo@sewax.com' && password === 'demo123') {
+       handleDemoLogin();
+       return;
+    }
 
     try {
       if (isSignUp) {
@@ -44,13 +67,16 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
         if (error) throw error;
         
         if (data.session) {
-           // Explicitly navigate to dashboard on success
            navigate('/dashboard');
         }
       }
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.message || 'An unexpected error occurred');
+      if (err.message === 'Invalid login credentials') {
+        setError('Invalid email or password. If you haven\'t created an account yet, please switch to Sign Up.');
+      } else {
+        setError(err.message || 'An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -110,9 +136,19 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
               {isSignUp ? 'Sign Up' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="mt-4 pt-4 border-t border-gray-100">
+             <button 
+                onClick={handleDemoLogin}
+                className="w-full py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-lg text-sm flex items-center justify-center gap-2 transition-colors border border-gray-200"
+             >
+                <PlayCircle className="w-4 h-4 text-primary-600" />
+                Enter Demo Mode
+             </button>
+          </div>
           
           <button 
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
             className="w-full mt-4 text-sm text-gray-600 hover:text-primary-600 text-center"
           >
             {isSignUp ? 'Already have an account? Sign In' : 'Need an account? Sign Up'}

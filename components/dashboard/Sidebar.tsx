@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -13,10 +12,16 @@ import {
   Puzzle, 
   HelpCircle,
   ChevronRight, 
-  Shield, 
   ShoppingBag, 
   ShoppingCart, 
-  Monitor
+  Monitor,
+  Package,
+  User,
+  Tag,
+  Megaphone,
+  MapPin,
+  FileText,
+  Bell
 } from 'lucide-react';
 import { UserRole, hasPermission } from './RBACWrapper';
 import { useAuth } from '../auth/AuthProvider';
@@ -34,25 +39,37 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
     {
       label: "Commerce",
       items: [
-        { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
-        { icon: Monitor, label: 'POS Register', path: '/dashboard/pos', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+        { icon: LayoutDashboard, label: 'Overview', path: '/dashboard', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
+        { icon: Monitor, label: 'Point of Sale', path: '/dashboard/pos', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
         { icon: ShoppingCart, label: 'Orders', path: '/dashboard/orders', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
         { icon: ShoppingBag, label: 'Products', path: '/dashboard/products', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+        { icon: Package, label: 'Inventory', path: '/dashboard/inventory', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+        { icon: User, label: 'Customers', path: '/dashboard/customers', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+      ]
+    },
+    {
+      label: "Growth",
+      items: [
+        { icon: Tag, label: 'Discounts', path: '/dashboard/discounts', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
+        { icon: Megaphone, label: 'Marketing', path: '/dashboard/marketing', allowed: ['Owner', 'Admin'] as UserRole[] },
+        { icon: BarChart2, label: 'Analytics', path: '/dashboard/analytics', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
       ]
     },
     {
       label: "Online Store",
       items: [
-        { icon: Globe, label: 'All Sites', path: '/dashboard/sites', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
+        { icon: Globe, label: 'Sites & Domains', path: '/dashboard/sites', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
         { icon: PenTool, label: 'Website Builder', path: '/dashboard/builder', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
-        { icon: BarChart2, label: 'Analytics', path: '/dashboard/analytics', allowed: ['Owner', 'Admin', 'Editor', 'Viewer'] as UserRole[] },
+        { icon: LayoutDashboard, label: 'Templates', path: '/dashboard/templates', allowed: ['Owner', 'Admin', 'Editor'] as UserRole[] },
       ]
     },
     {
       label: "Organization",
       items: [
-        { icon: CreditCard, label: 'Billing', path: '/dashboard/billing', allowed: ['Owner'] as UserRole[] },
+        { icon: MapPin, label: 'Locations', path: '/dashboard/locations', allowed: ['Owner', 'Admin'] as UserRole[] },
         { icon: Users, label: 'Team', path: '/dashboard/team', allowed: ['Owner', 'Admin'] as UserRole[] },
+        { icon: FileText, label: 'Reports', path: '/dashboard/reports', allowed: ['Owner', 'Admin', 'Accountant'] as UserRole[] },
+        { icon: CreditCard, label: 'Billing', path: '/dashboard/billing', allowed: ['Owner'] as UserRole[] },
         { icon: Puzzle, label: 'Integrations', path: '/dashboard/integrations', allowed: ['Owner', 'Admin'] as UserRole[] },
         { icon: Settings, label: 'Settings', path: '/dashboard/settings', allowed: ['Owner', 'Admin'] as UserRole[] },
       ]
@@ -80,7 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
               <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-3">{group.label}</h4>
               <div className="space-y-1">
                 {visibleItems.map((item) => {
-                  const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
+                  const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname === item.path);
                   return (
                     <button
                       key={item.path}
@@ -107,12 +124,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       
       {/* Footer / User Profile */}
       <div className="p-4 border-t border-gray-100 bg-gray-50/50">
-         <button className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg mb-2 transition-colors">
-            <HelpCircle className="w-4 h-4 text-gray-400" />
-            Help & Support
-         </button>
+         <div className="flex justify-between items-center mb-4">
+             <button 
+                onClick={() => navigate('/dashboard/support')}
+                className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-primary-600 transition-colors"
+             >
+                <HelpCircle className="w-3.5 h-3.5" /> Support
+             </button>
+             <button 
+                onClick={() => navigate('/dashboard/notifications')}
+                className="flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-primary-600 transition-colors"
+             >
+                <Bell className="w-3.5 h-3.5" /> Alerts
+             </button>
+         </div>
 
-        <div className="flex items-center gap-3 px-3 py-2 mt-2 border-t border-gray-200 pt-4">
+        <div className="flex items-center gap-3 px-3 py-2 border-t border-gray-200 pt-3">
           <div className="relative">
              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white">
                 {user?.email?.charAt(0).toUpperCase() || 'U'}

@@ -3,21 +3,47 @@ import React, { useState } from 'react';
 import { Button } from '../Button';
 import { Shield, Lock, AlertTriangle, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase/client';
 
 export const AdminLogin: React.FC = () => {
-  const [email, setEmail] = useState('admin@sewax.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate auth check
-    setTimeout(() => {
+    setError(null);
+
+    // ADMIN DEMO BYPASS
+    if (email === 'admin@sewax.com' && password === 'admin123') {
+       setTimeout(() => {
+          navigate('/admin/dashboard');
+       }, 500);
+       return;
+    }
+
+    try {
+      // 1. Authenticate with Supabase
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      // 2. Check if user is super admin
+      if (data.user) {
+        navigate('/admin/dashboard');
+      }
+    } catch (err: any) {
+      console.error("Admin Login Error", err);
+      setError(err.message || "Authentication failed");
+    } finally {
       setIsLoading(false);
-      navigate('/admin/dashboard');
-    }, 1500);
+    }
   };
 
   return (
@@ -37,24 +63,20 @@ export const AdminLogin: React.FC = () => {
                <Shield className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">System Admin</h1>
-            <p className="text-neutral-400 text-sm mt-1">Restricted Access Level 5</p>
+            <p className="text-neutral-400 text-sm mt-1">Restricted Access</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             
-            {/* Demo Credentials Box */}
-            <div className="bg-blue-900/20 border border-blue-900/50 rounded-lg p-3 flex gap-3">
-              <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-blue-200">
-                <p className="font-bold mb-1">Test Credentials:</p>
-                <p>Email: <span className="font-mono text-blue-100">admin@sewax.com</span></p>
-                <p>Password: <span className="font-mono text-blue-100">admin123</span></p>
-              </div>
-            </div>
+            {error && (
+               <div className="bg-red-900/20 border border-red-900/50 rounded-lg p-3 text-xs text-red-200">
+                  {error}
+               </div>
+            )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1.5">System ID / Email</label>
+                <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Email</label>
                 <input 
                   type="email" 
                   value={email}
@@ -64,7 +86,7 @@ export const AdminLogin: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Access Key</label>
+                <label className="block text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Password</label>
                 <input 
                   type="password" 
                   value={password}
@@ -73,13 +95,6 @@ export const AdminLogin: React.FC = () => {
                   placeholder="••••••••••••"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-               <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-               <p className="text-xs text-yellow-200">
-                  This area is monitored. IP address logged: 192.168.1.1
-               </p>
             </div>
 
             <Button 

@@ -1,13 +1,26 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
-import { ExternalLink, Globe, Palette, Layout, Settings, Rocket, CheckCircle } from 'lucide-react';
+import { ExternalLink, Globe, Palette, Layout, Settings, Rocket, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
+import { supabase } from '../../lib/supabase/client';
 
 export const SitesList: React.FC = () => {
   const { tenant } = useAuth();
+  const [pages, setPages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!tenant) return <div>Loading...</div>;
+  useEffect(() => {
+    if(!tenant) return;
+    const fetchPages = async () => {
+       const { data } = await supabase.from('pages').select('*').eq('tenant_id', tenant.id);
+       if(data) setPages(data);
+       setLoading(false);
+    };
+    fetchPages();
+  }, [tenant]);
+
+  if (!tenant) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -59,11 +72,14 @@ export const SitesList: React.FC = () => {
            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
               <h3 className="font-bold text-gray-900 mb-4">Pages & Navigation</h3>
               <div className="space-y-3">
-                 {['Home'].map((page, i) => (
+                 {pages.length === 0 && <p className="text-sm text-gray-500 italic">No pages created yet.</p>}
+                 {pages.map((page, i) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-primary-200 transition-colors">
-                       <span className="text-sm font-medium text-gray-700">{page}</span>
+                       <span className="text-sm font-medium text-gray-700">{page.title} <span className="text-xs text-gray-400 font-normal">/{page.slug}</span></span>
                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-bold uppercase">Live</span>
+                          <span className={`px-2 py-0.5 text-xs rounded-full font-bold uppercase ${page.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
+                             {page.is_published ? 'Live' : 'Draft'}
+                          </span>
                           <button className="text-gray-400 hover:text-primary-600 text-xs font-medium">Edit</button>
                        </div>
                     </div>

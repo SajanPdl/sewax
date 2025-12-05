@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './components/auth/AuthProvider';
@@ -20,6 +19,16 @@ import { Footer } from './components/Footer';
 import { POS } from './components/dashboard/POS';
 import { Products } from './components/dashboard/Products';
 import { Orders } from './components/dashboard/Orders';
+import { Customers } from './components/dashboard/Customers';
+import { Inventory } from './components/dashboard/Inventory';
+import { Discounts } from './components/dashboard/Discounts';
+
+// Operations Imports
+import { Locations } from './components/dashboard/Locations';
+import { Marketing } from './components/dashboard/Marketing';
+import { Reports } from './components/dashboard/Reports';
+import { Notifications } from './components/dashboard/Notifications';
+import { Support } from './components/dashboard/Support';
 
 // Admin Imports
 import { AdminLogin } from './components/admin/AdminLogin';
@@ -31,6 +40,20 @@ import { UserManager } from './components/admin/UserManager';
 import { BillingOverview } from './components/admin/BillingOverview';
 import { SupportTickets } from './components/admin/SupportTickets';
 import { AuditLogs } from './components/admin/AuditLogs';
+import { AdminReports } from './components/admin/AdminReports';
+import { AdminHealth } from './components/admin/AdminHealth';
+import { AdminRoles } from './components/admin/AdminRoles';
+import { AdminSites } from './components/admin/AdminSites';
+import { AdminStorage } from './components/admin/AdminStorage';
+import { AdminCMS } from './components/admin/AdminCMS';
+import { AdminJobs } from './components/admin/AdminJobs';
+import { AdminSecurity } from './components/admin/AdminSecurity';
+import { AdminBackups } from './components/admin/AdminBackups';
+import { AdminSettings } from './components/admin/AdminSettings';
+import { AdminAPIKeys } from './components/admin/AdminAPIKeys';
+import { AdminFeatureFlags } from './components/admin/AdminFeatureFlags';
+import { AdminAnnouncements } from './components/admin/AdminAnnouncements';
+import { AdminDeployments } from './components/admin/AdminDeployments';
 import { Button } from './components/Button';
 
 const Navbar: React.FC<{ 
@@ -58,7 +81,7 @@ const Navbar: React.FC<{
 };
 
 // Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
   if (!session) return <Navigate to="/login" replace />;
@@ -66,7 +89,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Public Only Route (Redirects to Dashboard if logged in)
-const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+const PublicOnlyRoute = ({ children }: { children?: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return <div className="h-screen flex items-center justify-center text-primary-600">Loading...</div>;
   if (session) return <Navigate to="/dashboard" replace />;
@@ -75,26 +98,42 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Main Layout Wrapper
 const DashboardLayout = () => {
-  const { signOut, role } = useAuth();
+  const { signOut } = useAuth();
   
   return (
     <div className="flex min-h-screen bg-gray-50">
        <Sidebar onLogout={signOut} />
        <main className="flex-1 lg:ml-64 transition-all duration-300">
           <Routes>
-              <Route index element={<Overview role={role} />} />
+              <Route index element={<Overview />} />
+              
+              {/* Commerce */}
+              <Route path="pos" element={<POS />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="products" element={<Products />} />
+              <Route path="inventory" element={<Inventory />} />
+              <Route path="customers" element={<Customers />} />
+              
+              {/* Online Store */}
               <Route path="sites" element={<SitesList />} />
               <Route path="builder" element={<WebsiteBuilder />} />
               <Route path="editor" element={<WebsiteBuilder />} />
-              <Route path="analytics" element={<Analytics />} />
               <Route path="templates" element={<Templates />} />
-              <Route path="team" element={<Team role={role} />} />
+              <Route path="analytics" element={<Analytics />} />
+
+              {/* Growth */}
+              <Route path="discounts" element={<Discounts />} />
+              <Route path="marketing" element={<Marketing />} />
+              
+              {/* Organization & Ops */}
+              <Route path="locations" element={<Locations />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="team" element={<Team />} />
               <Route path="integrations" element={<Integrations />} />
+              <Route path="notifications" element={<Notifications />} />
               <Route path="settings" element={<Settings />} />
               <Route path="billing" element={<Billing />} />
-              <Route path="pos" element={<POS />} />
-              <Route path="products" element={<Products />} />
-              <Route path="orders" element={<Orders />} />
+              <Route path="support" element={<Support />} />
           </Routes>
        </main>
     </div>
@@ -135,12 +174,26 @@ const App: React.FC = () => {
                 <Routes>
                    <Route index element={<Navigate to="dashboard" replace />} />
                    <Route path="dashboard" element={<AdminDashboard />} />
+                   <Route path="reports" element={<AdminReports />} />
+                   <Route path="health" element={<AdminHealth />} />
                    <Route path="tenants" element={<TenantManager />} />
                    <Route path="users" element={<UserManager />} />
-                   <Route path="templates" element={<TemplateManager />} />
+                   <Route path="roles" element={<AdminRoles />} />
                    <Route path="billing" element={<BillingOverview />} />
+                   <Route path="templates" element={<TemplateManager />} />
+                   <Route path="sites" element={<AdminSites />} />
+                   <Route path="storage" element={<AdminStorage />} />
+                   <Route path="cms" element={<AdminCMS />} />
                    <Route path="support" element={<SupportTickets />} />
                    <Route path="audit" element={<AuditLogs />} />
+                   <Route path="jobs" element={<AdminJobs />} />
+                   <Route path="security" element={<AdminSecurity />} />
+                   <Route path="backups" element={<AdminBackups />} />
+                   <Route path="settings" element={<AdminSettings />} />
+                   <Route path="api" element={<AdminAPIKeys />} />
+                   <Route path="flags" element={<AdminFeatureFlags />} />
+                   <Route path="announcements" element={<AdminAnnouncements />} />
+                   <Route path="deploys" element={<AdminDeployments />} />
                 </Routes>
              </AdminLayout>
           } />

@@ -1,17 +1,12 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
 import { Mail, Shield, Trash2, UserPlus, Lock, Loader2 } from 'lucide-react';
-import { UserRole, RBACWrapper } from './RBACWrapper';
+import { RBACWrapper } from './RBACWrapper';
 import { supabase } from '../../lib/supabase/client';
 import { useAuth } from '../auth/AuthProvider';
 
-interface TeamProps {
-   role: UserRole;
-}
-
-export const Team: React.FC<TeamProps> = ({ role }) => {
-  const { tenant } = useAuth();
+export const Team: React.FC = () => {
+  const { tenant, role } = useAuth();
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
