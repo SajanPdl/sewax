@@ -45,8 +45,6 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
         
         if (data.session) {
            // Explicitly navigate to dashboard on success
-           // The App.tsx AuthProvider will also pick up the session change, 
-           // but explicit navigation makes the UI feel snappier.
            history.push('/dashboard');
         }
       }

@@ -89,7 +89,7 @@ const DashboardLayout = () => {
               <Route exact path={path} render={() => <Overview role={role} />} />
               <Route path={`${path}/sites`} component={SitesList} />
               <Route path={`${path}/builder`} component={WebsiteBuilder} />
-              <Route path={`${path}/editor`} component={WebsiteBuilder} /> {/* Alias for old link */}
+              <Route path={`${path}/editor`} component={WebsiteBuilder} />
               <Route path={`${path}/analytics`} component={Analytics} />
               <Route path={`${path}/templates`} component={Templates} />
               <Route path={`${path}/team`} render={() => <Team role={role} />} />
@@ -137,7 +137,7 @@ const App: React.FC = () => {
           <Route path="/admin" render={({ match }) => (
              <AdminLayout>
                 <Switch>
-                   <Route exact path={match.path} render={() => <Redirect to={`${match.path}/dashboard`} />} />
+                   <Redirect exact from={`${match.path}`} to={`${match.path}/dashboard`} />
                    <Route path={`${match.path}/dashboard`} component={AdminDashboard} />
                    <Route path={`${match.path}/tenants`} component={TenantManager} />
                    <Route path={`${match.path}/users`} component={UserManager} />

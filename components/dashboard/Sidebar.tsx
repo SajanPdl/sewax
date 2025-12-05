@@ -12,10 +12,10 @@ import {
   Users, 
   Puzzle, 
   HelpCircle,
-  ChevronRight,
-  Shield,
-  ShoppingBag,
-  ShoppingCart,
+  ChevronRight, 
+  Shield, 
+  ShoppingBag, 
+  ShoppingCart, 
   Monitor
 } from 'lucide-react';
 import { UserRole, hasPermission } from './RBACWrapper';
