@@ -101,6 +101,7 @@ export const AdminLogin: React.FC = () => {
               className="w-full bg-white text-neutral-900 hover:bg-neutral-200 font-bold"
               size="lg"
               isLoading={isLoading}
+              type="submit"
             >
               <Lock className="w-4 h-4 mr-2" />
               Authenticate

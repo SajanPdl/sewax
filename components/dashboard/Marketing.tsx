@@ -1,8 +1,13 @@
+
 import React, { useState } from 'react';
 import { Button } from '../Button';
 import { Mail, Send, Plus } from 'lucide-react';
 
 export const Marketing: React.FC = () => {
+  const handleCreate = () => {
+     alert('Campaign builder opening... (Feature currently in Beta)');
+  }
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
        <div className="mb-8 flex justify-between items-center">
@@ -10,7 +15,7 @@ export const Marketing: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Marketing</h1>
              <p className="text-gray-500">Email campaigns and automations.</p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={handleCreate}>
              <Plus className="w-4 h-4" /> Create Campaign
           </Button>
        </div>
@@ -22,7 +27,7 @@ export const Marketing: React.FC = () => {
              </div>
              <h3 className="text-xl font-bold text-gray-900 mb-2">No campaigns yet</h3>
              <p className="text-gray-500 mb-6 max-w-md mx-auto">Start engaging your customers with email newsletters or SMS promotions.</p>
-             <Button variant="outline">Browse Templates</Button>
+             <Button variant="outline" onClick={handleCreate}>Browse Templates</Button>
           </div>
        </div>
     </div>

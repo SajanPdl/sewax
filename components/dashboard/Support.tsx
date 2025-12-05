@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '../Button';
 import { HelpCircle, Send } from 'lucide-react';
@@ -55,7 +56,7 @@ export const Support: React.FC = () => {
                 <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
                 <textarea required rows={5} value={desc} onChange={e=>setDesc(e.target.value)} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-100 outline-none" placeholder="Describe your issue..." />
              </div>
-             <Button className="w-full flex items-center justify-center gap-2" isLoading={submitting}>
+             <Button className="w-full flex items-center justify-center gap-2" isLoading={submitting} type="submit">
                 <Send className="w-4 h-4" /> Submit Ticket
              </Button>
           </form>

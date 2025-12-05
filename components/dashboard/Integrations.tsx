@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from '../Button';
 import { Check, Plus, ExternalLink } from 'lucide-react';
 
 export const Integrations: React.FC = () => {
-  const integrations = [
+  const [integrations, setIntegrations] = useState([
     {
       id: 1,
       name: 'eSewa Payment',
@@ -44,7 +45,13 @@ export const Integrations: React.FC = () => {
       icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1024px-WhatsApp.svg.png',
       connected: false
     }
-  ];
+  ]);
+
+  const toggleIntegration = (id: number) => {
+    setIntegrations(prev => prev.map(app => 
+      app.id === id ? { ...app, connected: !app.connected } : app
+    ));
+  };
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -58,7 +65,6 @@ export const Integrations: React.FC = () => {
              <div key={app.id} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow flex flex-col h-full">
                 <div className="flex items-start justify-between mb-4">
                    <div className="w-12 h-12 bg-gray-50 rounded-lg overflow-hidden border border-gray-100 flex items-center justify-center">
-                      {/* Placeholder for actual logos, using text fallback if image fails, though mock URLs provided */}
                       <img src={app.icon} alt={app.name} className="w-full h-full object-cover" />
                    </div>
                    {app.connected ? (
@@ -78,14 +84,13 @@ export const Integrations: React.FC = () => {
                 <Button 
                    variant={app.connected ? 'outline' : 'primary'} 
                    className="w-full"
-                   disabled={app.connected}
+                   onClick={() => toggleIntegration(app.id)}
                 >
                    {app.connected ? 'Configure' : 'Connect'}
                 </Button>
              </div>
           ))}
           
-          {/* Request Integration Card */}
           <div className="bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-6 text-center">
              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
                 <Plus className="w-6 h-6 text-gray-400" />

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
 import { Mail, Shield, Trash2, UserPlus, Lock, Loader2 } from 'lucide-react';
@@ -33,6 +34,13 @@ export const Team: React.FC = () => {
     fetchMembers();
   }, [tenant]);
 
+  const handleInvite = () => {
+      const email = prompt("Enter email address to invite:");
+      if(email) {
+          alert(`Invite sent to ${email} (Mock)`);
+      }
+  };
+
   if (loading) return <div className="p-8"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>;
 
   return (
@@ -47,7 +55,7 @@ export const Team: React.FC = () => {
                 <Lock className="w-4 h-4" /> Invite Member
              </Button>
           }>
-             <Button className="flex items-center gap-2">
+             <Button className="flex items-center gap-2" onClick={handleInvite}>
                 <UserPlus className="w-4 h-4" /> Invite Member
              </Button>
           </RBACWrapper>

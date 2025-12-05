@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { MapPin, Plus, Loader2 } from 'lucide-react';
@@ -9,15 +10,32 @@ export const Locations: React.FC = () => {
   const [locations, setLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchLocations = async () => {
+     if (!tenant) return;
+     const { data } = await supabase.from('locations').select('*').eq('tenant_id', tenant.id);
+     if (data) setLocations(data);
+     setLoading(false);
+  };
+
   useEffect(() => {
-    if (!tenant) return;
-    const fetchLocations = async () => {
-       const { data } = await supabase.from('locations').select('*').eq('tenant_id', tenant.id);
-       if (data) setLocations(data);
-       setLoading(false);
-    };
     fetchLocations();
   }, [tenant]);
+
+  const handleAdd = async () => {
+    if(!tenant) return;
+    const name = prompt("Enter location name (e.g. Durbar Marg Outlet):");
+    if(!name) return;
+
+    const { error } = await supabase.from('locations').insert({
+       tenant_id: tenant.id,
+       name,
+       address: 'Kathmandu, Nepal',
+       is_active: true
+    });
+
+    if(error) alert('Error: ' + error.message);
+    else fetchLocations();
+  };
 
   if (loading) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
@@ -28,7 +46,7 @@ export const Locations: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Locations</h1>
              <p className="text-gray-500">Manage physical stores and POS terminals.</p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={handleAdd}>
              <Plus className="w-4 h-4" /> Add Location
           </Button>
        </div>

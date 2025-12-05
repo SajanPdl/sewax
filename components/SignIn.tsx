@@ -132,7 +132,7 @@ export const SignIn: React.FC<{ onLogin?: () => void }> = () => {
                 />
               </div>
             </div>
-            <Button className="w-full" isLoading={isLoading}>
+            <Button className="w-full" isLoading={isLoading} type="submit">
               {isSignUp ? 'Sign Up' : 'Sign In'}
             </Button>
           </form>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { Tag, Plus, Loader2, Calendar } from 'lucide-react';
@@ -9,15 +10,42 @@ export const Discounts: React.FC = () => {
   const [discounts, setDiscounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchDiscounts = async () => {
+     if (!tenant) return;
+     const { data } = await supabase.from('discounts').select('*').eq('tenant_id', tenant.id);
+     if (data) setDiscounts(data);
+     setLoading(false);
+  };
+
   useEffect(() => {
-    if (!tenant) return;
-    const fetchDiscounts = async () => {
-       const { data } = await supabase.from('discounts').select('*').eq('tenant_id', tenant.id);
-       if (data) setDiscounts(data);
-       setLoading(false);
-    };
     fetchDiscounts();
   }, [tenant]);
+
+  const handleCreate = async () => {
+     if(!tenant) return;
+     const code = prompt('Enter discount code (e.g. SUMMER2024):');
+     if(!code) return;
+     const value = prompt('Enter percentage value (e.g. 10):');
+     if(!value) return;
+
+     const newDiscount = {
+        tenant_id: tenant.id,
+        code: code.toUpperCase(),
+        type: 'percentage',
+        value: Number(value),
+        is_active: true,
+        usage_count: 0,
+        starts_at: new Date().toISOString()
+     };
+
+     const { error } = await supabase.from('discounts').insert(newDiscount);
+     
+     if(error) {
+        alert('Error creating discount: ' + error.message);
+     } else {
+        fetchDiscounts();
+     }
+  };
 
   if (loading) return <div className="p-8"><Loader2 className="w-8 h-8 animate-spin text-primary-500"/></div>;
 
@@ -28,7 +56,7 @@ export const Discounts: React.FC = () => {
              <h1 className="text-2xl font-display font-bold text-gray-900">Discounts & Promotions</h1>
              <p className="text-gray-500">Create coupons and automatic discounts.</p>
           </div>
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={handleCreate}>
              <Plus className="w-4 h-4" /> Create Discount
           </Button>
        </div>
@@ -57,7 +85,10 @@ export const Discounts: React.FC = () => {
              </div>
           ))}
           
-          <div className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:bg-gray-100 transition-colors cursor-pointer">
+          <div 
+            onClick={handleCreate}
+            className="bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:bg-gray-100 transition-colors cursor-pointer"
+          >
              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
                 <Plus className="w-6 h-6 text-gray-400" />
              </div>
