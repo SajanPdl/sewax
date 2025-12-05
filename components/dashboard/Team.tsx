@@ -13,31 +13,70 @@ export const Team: React.FC = () => {
 
   useEffect(() => {
     if (!tenant) return;
-
-    const fetchMembers = async () => {
-      // Fetch members and join with profiles to get details
-      const { data, error } = await supabase
-        .from('tenant_members')
-        .select(`
-          role,
-          joined_at,
-          profiles:user_id (full_name, email, avatar_url)
-        `)
-        .eq('tenant_id', tenant.id);
-      
-      if (data) {
-        setMembers(data);
-      }
-      setLoading(false);
-    };
-
     fetchMembers();
   }, [tenant]);
 
-  const handleInvite = () => {
-      const email = prompt("Enter email address to invite:");
-      if(email) {
-          alert(`Invite sent to ${email} (Mock)`);
+  const fetchMembers = async () => {
+    // Fetch members and join with profiles to get details
+    const { data, error } = await supabase
+      .from('tenant_members')
+      .select(`
+        id,
+        role,
+        joined_at,
+        profiles:user_id (full_name, email, avatar_url)
+      `)
+      .eq('tenant_id', tenant.id);
+    
+    if (data) {
+      setMembers(data);
+    }
+    setLoading(false);
+  };
+
+  const handleInvite = async () => {
+      const email = prompt("Enter email address of the user to invite:");
+      if(!email) return;
+
+      // Check if user exists in profiles
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .single();
+      
+      if (error || !profile) {
+          alert('User not found. Please ask them to sign up for Sewax first.');
+          return;
+      }
+
+      // Add to tenant_members
+      const { error: inviteError } = await supabase
+        .from('tenant_members')
+        .insert({
+            tenant_id: tenant.id,
+            user_id: profile.id,
+            role: 'Viewer' // Default role
+        });
+
+      if (inviteError) {
+          alert('Failed to invite: ' + inviteError.message);
+      } else {
+          alert(`Successfully added ${email} to the team!`);
+          fetchMembers();
+      }
+  };
+
+  const handleRemove = async (memberId: string) => {
+      if(!confirm("Are you sure you want to remove this member?")) return;
+      
+      const { error } = await supabase
+          .from('tenant_members')
+          .delete()
+          .eq('id', memberId);
+      
+      if (!error) {
+          setMembers(prev => prev.filter(m => m.id !== memberId));
       }
   };
 
@@ -105,7 +144,10 @@ export const Team: React.FC = () => {
                         <td className="px-6 py-4 text-right">
                            {member.role !== 'Owner' && (
                               <RBACWrapper allowedRoles={['Owner']} userRole={role}>
-                                 <button className="text-gray-400 hover:text-red-600 transition-colors">
+                                 <button 
+                                    onClick={() => handleRemove(member.id)}
+                                    className="text-gray-400 hover:text-red-600 transition-colors"
+                                 >
                                     <Trash2 className="w-4 h-4" />
                                  </button>
                               </RBACWrapper>

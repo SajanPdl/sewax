@@ -1,38 +1,18 @@
-import React, { useRef, useState, useEffect } from 'react';
+
+import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
-import Lottie from 'lottie-react';
 
 export const Hero3D: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll();
   const shouldReduceMotion = useReducedMotion();
   
-  // State for Lottie Fallback
-  const [lottieData, setLottieData] = useState<any>(null);
-  const [hasError, setHasError] = useState(false);
-
   // Mouse movement parallax
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
   const mouseX = useSpring(x, { stiffness: 150, damping: 20 });
   const mouseY = useSpring(y, { stiffness: 150, damping: 20 });
-
-  useEffect(() => {
-    // Use a reliable GitHub Raw URL for the Lottie JSON to avoid 404/CORS issues
-    // This is a simple "website builder" style animation
-    fetch('https://raw.githubusercontent.com/airbnb/lottie-web/master/demo/gwd/data.json')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-      })
-      .then(data => setLottieData(data))
-      .catch(err => {
-        console.warn("Failed to load fallback animation, using static fallback", err);
-        // We don't necessarily set error here, just don't set lottieData to show static fallback
-        setHasError(true); 
-      });
-  }, []);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     // Skip calculations if reduced motion is on
@@ -49,39 +29,6 @@ export const Hero3D: React.FC = () => {
   // Scroll Parallax
   const rotateScroll = useTransform(scrollY, [0, 500], [0, 15]);
   const yScroll = useTransform(scrollY, [0, 500], [0, -50]);
-
-  // Determine if we should show fallback
-  // Logic: If user prefers reduced motion OR we encountered an error (simulated or real) 
-  const showFallback = shouldReduceMotion || hasError;
-
-  if (showFallback && !lottieData) {
-     // Static fallback if even Lottie fails
-    return (
-      <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
-         <div className="w-[300px] h-[300px] bg-gray-100 rounded-full flex items-center justify-center shadow-inner">
-             <div className="text-center p-6">
-                <div className="w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-gray-900">Build Your Site</h3>
-                <p className="text-sm text-gray-500 mt-2">Interactive 3D preview unavailable.</p>
-             </div>
-         </div>
-      </div>
-    );
-  }
-
-  if (showFallback && lottieData) {
-      return (
-        <div className="w-full h-[500px] md:h-[600px] flex items-center justify-center">
-           <div className="w-[80%] max-w-[500px]">
-              <Lottie animationData={lottieData} loop={true} />
-           </div>
-        </div>
-      );
-  }
 
   return (
     <div 
