@@ -2,22 +2,12 @@
 import React from 'react';
 import { Button } from '../Button';
 import { ExternalLink, Globe, Palette, Layout, Settings, Rocket, CheckCircle } from 'lucide-react';
+import { useAuth } from '../auth/AuthProvider';
 
 export const SitesList: React.FC = () => {
-  // Single Store Data (One store per user model)
-  const store = {
-    id: 1,
-    name: 'Himalayan Coffee House',
-    subdomain: 'himalayan',
-    domain: 'himalayancoffee.sewax.com',
-    status: 'Published',
-    plan: 'Pro',
-    theme: {
-      name: 'Cafe Classic v2',
-      image: 'https://picsum.photos/400/250?random=101',
-      lastUpdated: 'Oct 20, 2024'
-    }
-  };
+  const { tenant } = useAuth();
+
+  if (!tenant) return <div>Loading...</div>;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -41,10 +31,14 @@ export const SitesList: React.FC = () => {
            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
               <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                  <h3 className="font-bold text-gray-900">Active Theme</h3>
-                 <span className="text-xs text-gray-500">Last published: 2 days ago</span>
+                 <span className="text-xs text-gray-500">Status: {tenant.subscription_status}</span>
               </div>
-              <div className="relative h-64 bg-gray-100 group">
-                 <img src={store.theme.image} alt={store.theme.name} className="w-full h-full object-cover" />
+              <div className="relative h-64 bg-gray-100 group flex items-center justify-center">
+                 {tenant.logo_url ? (
+                    <img src={tenant.logo_url} alt="Logo" className="max-h-32 object-contain" />
+                 ) : (
+                    <div className="text-gray-400 font-bold text-2xl">{tenant.name} Preview</div>
+                 )}
                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-3">
                     <Button className="shadow-xl">Customize</Button>
                     <Button variant="secondary" className="shadow-xl">Preview</Button>
@@ -52,8 +46,8 @@ export const SitesList: React.FC = () => {
               </div>
               <div className="p-6 flex items-center justify-between">
                  <div>
-                    <h4 className="font-bold text-lg text-gray-900">{store.theme.name}</h4>
-                    <p className="text-sm text-gray-500">Version 2.4.1 • Mobile Optimized</p>
+                    <h4 className="font-bold text-lg text-gray-900">Default Theme</h4>
+                    <p className="text-sm text-gray-500">Optimized for Mobile</p>
                  </div>
                  <Button variant="outline" size="sm" className="flex items-center gap-2">
                     <Layout className="w-4 h-4" /> Change Theme
@@ -65,7 +59,7 @@ export const SitesList: React.FC = () => {
            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
               <h3 className="font-bold text-gray-900 mb-4">Pages & Navigation</h3>
               <div className="space-y-3">
-                 {['Home', 'About Us', 'Menu / Shop', 'Contact'].map((page, i) => (
+                 {['Home'].map((page, i) => (
                     <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-primary-200 transition-colors">
                        <span className="text-sm font-medium text-gray-700">{page}</span>
                        <div className="flex items-center gap-2">
@@ -90,7 +84,10 @@ export const SitesList: React.FC = () => {
                  <div className="flex items-center gap-2 text-green-600 text-sm font-bold mb-1">
                     <CheckCircle className="w-4 h-4" /> Connected
                  </div>
-                 <p className="text-gray-900 font-mono text-sm">{store.domain}</p>
+                 <p className="text-gray-900 font-mono text-sm">{tenant.slug}.sewax.com</p>
+                 {tenant.custom_domain && (
+                    <p className="text-gray-900 font-mono text-sm mt-1">{tenant.custom_domain}</p>
+                 )}
               </div>
               <div className="pt-4 border-t border-gray-100">
                  <p className="text-xs text-gray-500 mb-3">Your site is secured with an SSL certificate.</p>

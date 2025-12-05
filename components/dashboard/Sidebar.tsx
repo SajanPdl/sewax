@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Settings, 
@@ -23,14 +23,12 @@ import { useAuth } from '../auth/AuthProvider';
 
 interface SidebarProps {
   onLogout: () => void;
-  role: UserRole;
-  setRole: (role: UserRole) => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role }) => {
-  const history = useHistory();
+export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+  const navigate = useNavigate();
   const location = useLocation();
-  const { user, tenant } = useAuth();
+  const { user, tenant, role } = useAuth();
 
   const menuGroups = [
     {
@@ -86,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onLogout, role }) => {
                   return (
                     <button
                       key={item.path}
-                      onClick={() => history.push(item.path)}
+                      onClick={() => navigate(item.path)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group ${
                         isActive 
                         ? 'bg-primary-50 text-primary-700' 

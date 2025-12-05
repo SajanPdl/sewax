@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { 
   Search, Bell, Plus, ExternalLink, CreditCard, 
   ShoppingBag, TrendingUp, ArrowUpRight, Package, 
-  ShoppingCart, Zap
+  ShoppingCart, Zap, Loader2
 } from 'lucide-react';
 import { UserRole, RBACWrapper } from './RBACWrapper';
 import { supabase } from '../../lib/supabase/client';
@@ -17,12 +18,14 @@ export const Overview: React.FC<OverviewProps> = ({ role }) => {
   const { tenant } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [orders, setOrders] = useState<any[]>([]);
-  const [metrics, setMetrics] = useState({ revenue: 0, count: 0 });
+  const [metrics, setMetrics] = useState({ revenue: 0, orderCount: 0, productCount: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!tenant) return;
 
     const fetchData = async () => {
+      setLoading(true);
       // Fetch Orders
       const { data: orderData } = await supabase
         .from('orders')
@@ -33,27 +36,38 @@ export const Overview: React.FC<OverviewProps> = ({ role }) => {
       
       if (orderData) setOrders(orderData);
 
-      // Fetch Metrics (Simplified)
+      // Fetch Metrics: Revenue & Orders
       const { data: allOrders } = await supabase
         .from('orders')
         .select('total')
         .eq('tenant_id', tenant.id);
       
+      // Fetch Metrics: Products
+      const { count: prodCount } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('tenant_id', tenant.id);
+
       if (allOrders) {
-        const totalRev = allOrders.reduce((sum, o) => sum + o.total, 0);
-        setMetrics({ revenue: totalRev, count: allOrders.length });
+        const totalRev = allOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+        setMetrics({ 
+          revenue: totalRev, 
+          orderCount: allOrders.length,
+          productCount: prodCount || 0
+        });
       }
+      setLoading(false);
     };
 
     fetchData();
 
     // Realtime subscription
     const channel = supabase
-      .channel('dashboard-orders')
+      .channel('dashboard-overview')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders', filter: `tenant_id=eq.${tenant.id}` }, 
         (payload: any) => {
           setOrders(prev => [payload.new, ...prev].slice(0, 5));
-          setMetrics(prev => ({ revenue: prev.revenue + payload.new.total, count: prev.count + 1 }));
+          setMetrics(prev => ({ ...prev, revenue: prev.revenue + Number(payload.new.total), orderCount: prev.orderCount + 1 }));
         }
       )
       .subscribe();
@@ -64,10 +78,14 @@ export const Overview: React.FC<OverviewProps> = ({ role }) => {
   // Commerce KPI Data based on real metrics
   const kpiData = [
     { label: 'Total Revenue', value: `NPR ${metrics.revenue.toLocaleString()}`, sub: 'Real-time updates', icon: CreditCard, color: 'text-green-600', bg: 'bg-green-50' },
-    { label: 'Total Orders', value: metrics.count.toString(), sub: 'Lifetime', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
-    { label: 'Avg. Order Value', value: `NPR ${metrics.count > 0 ? Math.round(metrics.revenue / metrics.count) : 0}`, sub: 'Average', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
-    { label: 'Active Products', value: 'Syncing...', sub: 'Inventory', icon: Package, color: 'text-orange-600', bg: 'bg-orange-50' },
+    { label: 'Total Orders', value: metrics.orderCount.toString(), sub: 'Lifetime', icon: ShoppingCart, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Avg. Order Value', value: `NPR ${metrics.orderCount > 0 ? Math.round(metrics.revenue / metrics.orderCount).toLocaleString() : 0}`, sub: 'Average', icon: TrendingUp, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Active Products', value: metrics.productCount.toString(), sub: 'Inventory', icon: Package, color: 'text-orange-600', bg: 'bg-orange-50' },
   ];
+
+  if (loading && !tenant) {
+      return <div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary-500" /></div>;
+  }
 
   return (
     <div className="flex flex-col h-full bg-gray-50/50">
@@ -115,7 +133,7 @@ export const Overview: React.FC<OverviewProps> = ({ role }) => {
                         Online
                      </span>
                   </h2>
-                  <a href={`https://${tenant?.slug}.sewax.com`} target="_blank" rel="noreferrer" className="text-sm text-gray-500 hover:text-primary-600 flex items-center gap-1">
+                  <a href="#" className="text-sm text-gray-500 hover:text-primary-600 flex items-center gap-1">
                      {tenant?.slug}.sewax.com <ExternalLink className="w-3 h-3" />
                   </a>
                </div>
@@ -179,7 +197,10 @@ export const Overview: React.FC<OverviewProps> = ({ role }) => {
                    </tbody>
                 </table>
              ) : (
-                <div className="p-8 text-center text-gray-500">No orders found.</div>
+                <div className="p-12 text-center text-gray-500">
+                    <p className="mb-2">No orders found.</p>
+                    <p className="text-xs">Once you make a sale, it will appear here.</p>
+                </div>
              )}
          </div>
 

@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 import { Button } from '../Button';
 import { Shield, Lock, AlertTriangle, Info } from 'lucide-react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('admin@sewax.com');
   const [password, setPassword] = useState('admin123');
   const [isLoading, setIsLoading] = useState(false);
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,7 +16,7 @@ export const AdminLogin: React.FC = () => {
     // Simulate auth check
     setTimeout(() => {
       setIsLoading(false);
-      history.push('/admin/dashboard');
+      navigate('/admin/dashboard');
     }, 1500);
   };
 
