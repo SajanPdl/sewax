@@ -16,7 +16,8 @@
     "lucide-react": "0.358.0",
     "framer-motion": "10.18.0",
     "lottie-react": "2.4.0",
-    "@supabase/supabase-js": "^2.86.0"
+    "@supabase/supabase-js": "^2.86.0",
+    "@google/genai": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

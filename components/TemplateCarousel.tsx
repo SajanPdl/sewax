@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, ExternalLink, Code, Layers, Zap } from 'lucide-react';
@@ -181,7 +182,7 @@ export const TemplateCarousel: React.FC<TemplateCarouselProps> = ({ templates })
 
                 <div className="flex gap-4">
                   <Button className="flex-1">Start Editing</Button>
-                  <Button variant="outline" className="flex items-center gap-2">
+                  <Button variant="outline" className="flex items-center gap-2" onClick={() => selectedTemplate.preview_url ? window.open(selectedTemplate.preview_url, '_blank') : alert('Preview unavailable for this template.')}>
                     <ExternalLink className="w-4 h-4" />
                     Live Preview
                   </Button>

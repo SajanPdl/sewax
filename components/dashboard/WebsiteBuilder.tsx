@@ -48,6 +48,14 @@ export const WebsiteBuilder: React.FC = () => {
     setSaving(false);
   };
 
+  const handlePreview = () => {
+      if(tenant?.slug) {
+          window.open(`https://${tenant.slug}.sewax.com`, '_blank');
+      } else {
+          alert('Preview unavailable.');
+      }
+  };
+
   if (loading) {
     return <div className="h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary-500" /></div>;
   }
@@ -96,7 +104,7 @@ export const WebsiteBuilder: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-             <Button variant="outline" size="sm" className="hidden md:flex items-center gap-1">
+             <Button variant="outline" size="sm" className="hidden md:flex items-center gap-1" onClick={handlePreview}>
                 <Eye className="w-4 h-4" /> Preview
              </Button>
              <Button size="sm" className="flex items-center gap-1" onClick={handleSave} isLoading={saving}>

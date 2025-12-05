@@ -13,14 +13,15 @@ export const Templates: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [applyingId, setApplyingId] = useState<string | null>(null);
   
-  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS', 'General'];
+  const categories = ['All', 'Travel', 'Restaurant', 'E-commerce', 'SaaS', 'Business', 'General'];
 
   useEffect(() => {
     const fetchTemplates = async () => {
+      // Changed from gallery_templates to templates
       const { data, error } = await supabase
-        .from('gallery_templates')
+        .from('templates')
         .select('*')
-        .eq('is_active', true);
+        .eq('status', 'published');
       
       if (data) setTemplates(data);
       setLoading(false);
@@ -39,7 +40,8 @@ export const Templates: React.FC = () => {
     const newSettings = { 
         ...currentSettings, 
         active_theme_id: template.id, 
-        theme_name: template.name 
+        theme_name: template.name,
+        theme_slug: template.slug
     };
     
     const { error } = await supabase.from('tenants').update({
@@ -50,10 +52,18 @@ export const Templates: React.FC = () => {
         alert('Failed to apply template: ' + error.message);
     } else {
         alert('Template applied successfully!');
-        // Ideally reload tenant or context here, but UI update is sufficient for now
+        window.location.reload(); // Quick refresh to update state
     }
     setApplyingId(null);
   }
+
+  const handlePreview = (template: any) => {
+      if (template.preview_url) {
+          window.open(template.preview_url, '_blank');
+      } else {
+          alert('Preview unavailable for this template.');
+      }
+  };
 
   const filteredTemplates = filter === 'All' 
     ? templates 
@@ -114,7 +124,7 @@ export const Templates: React.FC = () => {
             >
                 <div className="relative h-48 overflow-hidden bg-gray-100">
                 <img 
-                    src={template.image_url} 
+                    src={template.image_url || 'https://via.placeholder.com/400x300?text=No+Preview'} 
                     alt={template.name} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -136,7 +146,7 @@ export const Templates: React.FC = () => {
                 <p className="text-sm text-gray-500 mb-4 line-clamp-2">{template.description}</p>
                 
                 <div className="flex gap-3">
-                    <Button variant="outline" size="sm" className="flex-1">Preview</Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handlePreview(template)}>Preview</Button>
                     {isActive ? (
                          <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 border-green-600" disabled>Active</Button>
                     ) : (

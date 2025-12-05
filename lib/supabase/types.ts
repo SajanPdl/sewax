@@ -51,7 +51,7 @@ export interface Database {
           custom_domain: string | null
           domain_verified: boolean
           plan: string
-          subscription_status: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime'
+          subscription_status: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime' | 'suspended'
           trial_ends_at: string | null
           current_period_ends_at: string | null
           stripe_customer_id: string | null
@@ -66,7 +66,7 @@ export interface Database {
           custom_domain?: string | null
           domain_verified?: boolean
           plan?: string
-          subscription_status?: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime'
+          subscription_status?: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime' | 'suspended'
           trial_ends_at?: string | null
           current_period_ends_at?: string | null
           stripe_customer_id?: string | null
@@ -81,7 +81,7 @@ export interface Database {
           custom_domain?: string | null
           domain_verified?: boolean
           plan?: string
-          subscription_status?: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime'
+          subscription_status?: 'trial' | 'active' | 'past_due' | 'canceled' | 'lifetime' | 'suspended'
           trial_ends_at?: string | null
           current_period_ends_at?: string | null
           stripe_customer_id?: string | null
@@ -110,6 +110,99 @@ export interface Database {
         Update: {
           role?: 'Owner' | 'Admin' | 'Editor' | 'Viewer' | 'Support_Agent'
           invited_by?: string | null
+        }
+      }
+      templates: {
+        Row: {
+          id: string
+          slug: string
+          name: string
+          description: string | null
+          category: string | null
+          image_url: string | null
+          manifest: Json | null
+          current_version: string
+          components_list: Json | null
+          assets: Json | null
+          status: 'draft' | 'staged' | 'published' | 'archived'
+          preview_url: string | null
+          installs_count: number
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          slug: string
+          name: string
+          description?: string | null
+          category?: string | null
+          image_url?: string | null
+          manifest?: Json | null
+          current_version?: string
+          components_list?: Json | null
+          assets?: Json | null
+          status?: 'draft' | 'staged' | 'published' | 'archived'
+          preview_url?: string | null
+          installs_count?: number
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          slug?: string
+          name?: string
+          description?: string | null
+          category?: string | null
+          image_url?: string | null
+          manifest?: Json | null
+          current_version?: string
+          components_list?: Json | null
+          assets?: Json | null
+          status?: 'draft' | 'staged' | 'published' | 'archived'
+          preview_url?: string | null
+          installs_count?: number
+          created_by?: string | null
+          updated_at?: string
+        }
+      }
+      template_raw_uploads: {
+        Row: {
+          id: string
+          filename: string | null
+          storage_path: string | null
+          uploader_id: string | null
+          status: string
+          validation_report: Json | null
+          created_at: string
+        }
+        Insert: {
+          filename?: string | null
+          storage_path?: string | null
+          uploader_id?: string | null
+          status?: string
+          validation_report?: Json | null
+          created_at?: string
+        }
+        Update: {
+          status?: string
+          validation_report?: Json | null
+        }
+      }
+      template_conversion_logs: {
+        Row: {
+          id: string
+          upload_id: string | null
+          step: string | null
+          status: string | null
+          details: Json | null
+          created_at: string
+        }
+        Insert: {
+          upload_id?: string | null
+          step?: string | null
+          status?: string | null
+          details?: Json | null
+          created_at?: string
         }
       }
       gallery_templates: {
@@ -356,7 +449,7 @@ export interface Database {
           sku?: string | null
           quantity: number
           price: number
-          // total is generated always as stored
+          total?: number
         }
         Update: {
           quantity?: number
@@ -394,27 +487,6 @@ export interface Database {
           priority?: 'Low' | 'Medium' | 'High' | 'Critical'
           assigned_to?: string | null
           updated_at?: string | null
-        }
-      }
-      ticket_messages: {
-        Row: {
-          id: string
-          ticket_id: string
-          sender_id: string | null
-          message: string
-          is_internal: boolean
-          created_at: string
-        }
-        Insert: {
-          ticket_id: string
-          sender_id?: string | null
-          message: string
-          is_internal?: boolean
-          created_at?: string
-        }
-        Update: {
-          message?: string
-          is_internal?: boolean
         }
       }
       audit_logs: {
@@ -459,6 +531,163 @@ export interface Database {
           value?: Json
           description?: string | null
           updated_at?: string | null
+        }
+      }
+      plans: {
+        Row: {
+          id: string
+          name: string
+          price_monthly: number
+          price_yearly: number
+          features: string[] | null
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          name: string
+          price_monthly: number
+          price_yearly: number
+          features?: string[] | null
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          features?: string[] | null
+          is_active?: boolean
+        }
+      }
+      invoices: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          amount: number
+          status: string
+          pdf_url: string | null
+          created_at: string
+        }
+        Insert: {
+          tenant_id?: string | null
+          amount: number
+          status?: string
+          pdf_url?: string | null
+          created_at?: string
+        }
+      }
+      feature_flags: {
+        Row: {
+          id: string
+          key: string
+          description: string | null
+          is_enabled: boolean
+          created_at: string
+        }
+        Insert: {
+          key: string
+          description?: string | null
+          is_enabled?: boolean
+          created_at?: string
+        }
+        Update: {
+          is_enabled?: boolean
+        }
+      }
+      announcements: {
+        Row: {
+          id: string
+          title: string
+          message: string
+          type: string
+          target_audience: string
+          created_at: string
+        }
+        Insert: {
+          title: string
+          message: string
+          type?: string
+          target_audience?: string
+          created_at?: string
+        }
+      }
+      deployments: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          version: string | null
+          commit_hash: string | null
+          status: string
+          logs: string | null
+          created_at: string
+        }
+        Insert: {
+          tenant_id?: string | null
+          version?: string | null
+          commit_hash?: string | null
+          status?: string
+          logs?: string | null
+          created_at?: string
+        }
+      }
+      system_jobs: {
+        Row: {
+          id: string
+          job_type: string
+          status: string
+          started_at: string | null
+          completed_at: string | null
+          created_at: string
+        }
+      }
+      admin_api_keys: {
+        Row: {
+          id: string
+          name: string
+          key_prefix: string
+          scopes: string[]
+          last_used_at: string | null
+          created_at: string
+        }
+        Insert: {
+          name: string
+          key_prefix: string
+          scopes?: string[]
+        }
+      }
+      storage_stats: {
+        Row: {
+          id: string
+          bucket_name: string
+          object_count: number
+          total_size_bytes: number
+          updated_at: string
+        }
+      }
+      system_backups: {
+        Row: {
+          id: string
+          filename: string
+          size_bytes: number
+          completed_at: string
+        }
+      }
+      cms_pages: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          content: string | null
+          updated_at: string
+        }
+        Insert: {
+          title: string
+          slug: string
+          content?: string | null
+        }
+        Update: {
+          content?: string | null
+          updated_at?: string
         }
       }
     }

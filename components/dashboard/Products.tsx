@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
-import { Search, Plus, Filter, AlertCircle, Loader2, Trash2, X, Save, Image as ImageIcon } from 'lucide-react';
+import { Search, Plus, Filter, AlertCircle, Loader2, Trash2, X, Save, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 import { useAuth } from '../auth/AuthProvider';
+import { GoogleGenAI } from "@google/genai";
 
 export const Products: React.FC = () => {
   const { tenant } = useAuth();
@@ -14,13 +15,15 @@ export const Products: React.FC = () => {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     sku: '',
     price: '',
     inventory: '',
     category: 'General',
-    image_url: ''
+    image_url: '',
+    description: ''
   });
 
   const fetchProducts = async () => {
@@ -46,9 +49,36 @@ export const Products: React.FC = () => {
         price: '',
         inventory: '10',
         category: 'General',
-        image_url: ''
+        image_url: '',
+        description: ''
      });
      setIsModalOpen(true);
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!formData.title) {
+        alert("Please enter a product title first.");
+        return;
+    }
+    
+    setIsGenerating(true);
+    try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Write a compelling, short (2-3 sentences) product description for a ${formData.category} product named "${formData.title}". The tone should be professional yet persuasive. Currency is NPR.`
+        });
+        
+        const generatedText = response.text;
+        if (generatedText) {
+            setFormData(prev => ({ ...prev, description: generatedText.trim() }));
+        }
+    } catch (error: any) {
+        console.error("AI Generation Error:", error);
+        alert("Failed to generate description. Please try again.");
+    } finally {
+        setIsGenerating(false);
+    }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
@@ -64,6 +94,7 @@ export const Products: React.FC = () => {
        sku: formData.sku,
        category: formData.category,
        image_url: formData.image_url || null,
+       description: formData.description,
        status: 'Active'
     });
 
@@ -200,14 +231,14 @@ export const Products: React.FC = () => {
        {/* Add Product Modal */}
        {isModalOpen && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up">
+             <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
                 <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                    <h3 className="font-bold text-gray-900">Add New Product</h3>
                    <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                       <X className="w-5 h-5" />
                    </button>
                 </div>
-                <form onSubmit={handleSaveProduct} className="p-6 space-y-4">
+                <form onSubmit={handleSaveProduct} className="p-6 space-y-4 overflow-y-auto">
                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Product Title</label>
                       <input 
@@ -274,6 +305,28 @@ export const Products: React.FC = () => {
                       </div>
                    </div>
                    
+                   <div>
+                      <div className="flex justify-between items-center mb-1">
+                          <label className="block text-sm font-medium text-gray-700">Description</label>
+                          <button 
+                            type="button" 
+                            onClick={handleGenerateDescription}
+                            disabled={isGenerating || !formData.title}
+                            className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                             {isGenerating ? <Loader2 className="w-3 h-3 animate-spin"/> : <Sparkles className="w-3 h-3" />}
+                             {isGenerating ? 'Drafting...' : 'Generate with AI'}
+                          </button>
+                      </div>
+                      <textarea 
+                         rows={3}
+                         value={formData.description}
+                         onChange={e => setFormData({...formData, description: e.target.value})}
+                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-100 focus:border-primary-500 outline-none transition-all"
+                         placeholder="Product details..."
+                      />
+                   </div>
+
                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
                       <input 

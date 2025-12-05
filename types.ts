@@ -5,6 +5,7 @@ export interface Template {
   category: string;
   image: string;
   description: string;
+  preview_url?: string;
 }
 
 export interface PricingPlan {

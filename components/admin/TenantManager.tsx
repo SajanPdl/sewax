@@ -1,11 +1,14 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '../Button';
-import { Search, ExternalLink, CheckCircle, AlertTriangle, Trash2, Power, Play, UserCog, Loader2 } from 'lucide-react';
+import { Search, ExternalLink, CheckCircle, AlertTriangle, Trash2, Power, Play, UserCog, Loader2, Plus, X } from 'lucide-react';
 import { supabase } from '../../lib/supabase/client';
 
 export const TenantManager: React.FC = () => {
   const [tenants, setTenants] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', slug: '', plan: 'Suruwat' });
 
   const fetchTenants = async () => {
      // Fetch tenants and their owners
@@ -26,6 +29,27 @@ export const TenantManager: React.FC = () => {
      fetchTenants();
   }, []);
 
+  const handleCreate = async (e: React.FormEvent) => {
+      e.preventDefault();
+      // 1. Create Tenant
+      const { data: tenant, error } = await supabase.from('tenants').insert({
+          name: formData.name,
+          slug: formData.slug.toLowerCase(),
+          plan: formData.plan,
+          subscription_status: 'trial'
+      }).select().single();
+
+      if(error) {
+          alert('Error creating tenant: ' + error.message);
+          return;
+      }
+
+      // In real scenario, we would also create a tenant_member for the owner here
+      // For now, we refresh list
+      setIsModalOpen(false);
+      fetchTenants();
+  };
+
   const handleToggleStatus = async (id: string, currentStatus: string) => {
       const newStatus = currentStatus === 'active' || currentStatus === 'trial' ? 'suspended' : 'active';
       await supabase.from('tenants').update({ subscription_status: newStatus }).eq('id', id);
@@ -42,7 +66,6 @@ export const TenantManager: React.FC = () => {
 
   const handleImpersonate = (tenantId: string) => {
       alert(`Impersonation started for tenant ${tenantId}. In a real app, this would swap your session tokens.`);
-      // Logic: Exchange super admin token for tenant owner token via edge function
   }
 
   const handleDelete = async (id: string) => {
@@ -60,8 +83,8 @@ export const TenantManager: React.FC = () => {
             <h1 className="text-2xl font-bold text-white">Tenant Management</h1>
             <p className="text-neutral-400">Manage {tenants.length} active workspaces.</p>
          </div>
-         <Button className="bg-primary-600 hover:bg-primary-700 text-white border-0">
-            Create Tenant
+         <Button onClick={() => setIsModalOpen(true)} className="bg-primary-600 hover:bg-primary-700 text-white border-0 flex items-center gap-2">
+            <Plus className="w-4 h-4"/> Create Tenant
          </Button>
       </div>
 
@@ -157,6 +180,61 @@ export const TenantManager: React.FC = () => {
          </table>
          {tenants.length === 0 && <div className="p-8 text-center text-neutral-500">No tenants found.</div>}
       </div>
+
+      {isModalOpen && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+             <div className="bg-neutral-800 border border-neutral-700 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                <div className="px-6 py-4 border-b border-neutral-700 flex justify-between items-center bg-neutral-900/50">
+                   <h3 className="font-bold text-white">Create Tenant</h3>
+                   <button onClick={() => setIsModalOpen(false)} className="text-neutral-400 hover:text-white">
+                      <X className="w-5 h-5" />
+                   </button>
+                </div>
+                <form onSubmit={handleCreate} className="p-6 space-y-4">
+                   <div>
+                      <label className="block text-xs font-bold text-neutral-400 uppercase mb-1">Company Name</label>
+                      <input 
+                         required
+                         type="text" 
+                         value={formData.name}
+                         onChange={e => setFormData({...formData, name: e.target.value})}
+                         className="w-full bg-neutral-900 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:border-primary-500 outline-none"
+                         placeholder="Acme Inc."
+                      />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-neutral-400 uppercase mb-1">Slug (Subdomain)</label>
+                      <input 
+                         required
+                         type="text" 
+                         value={formData.slug}
+                         onChange={e => setFormData({...formData, slug: e.target.value})}
+                         className="w-full bg-neutral-900 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:border-primary-500 outline-none"
+                         placeholder="acme"
+                      />
+                   </div>
+                   <div>
+                      <label className="block text-xs font-bold text-neutral-400 uppercase mb-1">Plan</label>
+                      <select 
+                         value={formData.plan} 
+                         onChange={e => setFormData({...formData, plan: e.target.value})}
+                         className="w-full bg-neutral-900 border border-neutral-600 rounded-lg px-3 py-2 text-white focus:border-primary-500 outline-none"
+                      >
+                         <option value="Suruwat">Suruwat (Free)</option>
+                         <option value="Byawasaya">Byawasaya (Pro)</option>
+                         <option value="Agency">Agency</option>
+                      </select>
+                   </div>
+                   <div className="flex gap-3 pt-4">
+                      <Button type="button" className="flex-1 bg-transparent border border-neutral-600 hover:bg-neutral-700 text-white" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                      <Button type="submit" className="flex-1 bg-primary-600 hover:bg-primary-700 text-white border-0">
+                         Create
+                      </Button>
+                   </div>
+                </form>
+             </div>
+          </div>
+       )}
     </div>
   );
 };
