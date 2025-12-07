@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { Search, Layout, Loader2, Check } from 'lucide-react';
