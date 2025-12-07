@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../Button';
 import { Search, Upload, FileCode, CheckCircle, Eye, Trash2, Loader2, X, Save, RefreshCw, Terminal, AlertTriangle, Play, Smartphone, Monitor, Sparkles, ExternalLink, Zap } from 'lucide-react';
@@ -18,6 +19,7 @@ export const TemplateManager: React.FC = () => {
   const [pipelineStatus, setPipelineStatus] = useState<string>('idle'); 
   const [progress, setProgress] = useState(0);
   const [isStarting, setIsStarting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<any>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
   // We need to persist the content for the publish step
@@ -32,6 +34,15 @@ export const TemplateManager: React.FC = () => {
      preview_url: ''
   });
 
+  // Demo Data for Quick Add
+  const demoContext = {
+      name: 'Kathmandu Delight',
+      slug: 'kathmandu-delight',
+      category: 'Restaurant',
+      description: 'A vibrant template for Nepali cuisine restaurants.',
+      image_url: 'https://picsum.photos/600/400?random=10'
+  };
+
   // --- 1. Fetching ---
   const fetchTemplates = async () => {
      setLoading(true);
@@ -45,7 +56,7 @@ export const TemplateManager: React.FC = () => {
   }, []);
 
   // --- 2. Pipeline Simulation (The AI Factory) ---
-  const runSimulation = async (uploadId: string, retry = false, demoContext?: any) => {
+  const runSimulation = async (uploadId: string, retry = false, contextData?: any) => {
       // If retrying or running demo, skip validation animation
       if (!retry) {
         setProgress(5);
@@ -55,8 +66,8 @@ export const TemplateManager: React.FC = () => {
         // Step 1: Validation
         await new Promise(r => setTimeout(r, 1000));
         setProgress(15);
-        addLog(uploadId, 'validator', 'success', 'Valid theme.json found. 14 PHP files detected.');
-        addLog(uploadId, 'validator', 'info', 'Detected structure: assets/css, frontend/header, footerWidgetArea...');
+        addLog(uploadId, 'validator', 'success', 'Valid theme.json found. Multi-page structure detected.');
+        addLog(uploadId, 'validator', 'info', 'Detected files: index.php, about.php, menu.php, contact.php, assets/css...');
         
         if (!uploadId.startsWith('mock-')) {
            await supabase.from('template_raw_uploads').update({ status: 'validated' }).eq('id', uploadId);
@@ -64,18 +75,18 @@ export const TemplateManager: React.FC = () => {
 
         // Step 2: Extraction
         setPipelineStatus('converting');
-        addLog(uploadId, 'extractor', 'processing', 'Stripping PHP tags and mapping Blade directives...');
+        addLog(uploadId, 'extractor', 'processing', 'Extracting PHP logic and mapping page routes...');
         await new Promise(r => setTimeout(r, 1000));
         setProgress(30);
-        addLog(uploadId, 'extractor', 'success', 'Logic extracted. Preparing for AI conversion.');
+        addLog(uploadId, 'extractor', 'success', 'Routes mapped. Preparing for AI component synthesis.');
       }
 
       // Step 3: AI Conversion with Gemini
       addLog(uploadId, 'ai_worker', 'processing', 'Connecting to Gemini 3.0 Pro (Thinking Mode) for full-stack conversion...');
       
-      let derivedName = demoContext?.name || formData.name;
-      let derivedCategory = demoContext?.category || formData.category || 'General';
-      let derivedDesc = demoContext?.description || formData.description;
+      let derivedName = contextData?.name || formData.name;
+      let derivedCategory = contextData?.category || formData.category || 'General';
+      let derivedDesc = contextData?.description || formData.description;
       const filename = uploadFile?.name || 'theme.zip';
 
       if (!derivedName) {
@@ -87,13 +98,12 @@ export const TemplateManager: React.FC = () => {
 
           if (!retry) {
               // 3a. Generate Migration Plan
-              // We simulate specific technical steps based on the user's provided file structure image
               const steps = [
-                  "Parsing assets/css/agency-main-style.css...",
-                  "Converting frontend/headerNavbarArea/navbar.blade.php to Navbar.tsx...",
-                  "Converting frontend/headerBreadcrumbArea/breadcrumb.blade.php to Hero.tsx...",
-                  "Converting footerWidgetArea/widget-area.blade.php to Footer.tsx...",
-                  "Optimizing assets/img/hero/donation-hero-man1.jpg..."
+                  "Analyzing file structure for Multi-Page layout...",
+                  "Converting navbar.blade.php to responsive Tailwind Header...",
+                  "Transpiling index.php, about.php, and contact.php sections...",
+                  "Refactoring CSS grid layouts to Tailwind utilities...",
+                  "Optimizing assets/img for production build..."
               ];
 
               const stepValue = 20 / steps.length;
@@ -108,60 +118,56 @@ export const TemplateManager: React.FC = () => {
           }
 
           // 3b. Generate Full HTML Preview (Using Gemini 3 Pro Thinking Mode)
-          const promptContext = demoContext 
-            ? `Create a template for: ${JSON.stringify(demoContext)}` 
-            : `Theme Name: ${derivedName}. Category: ${derivedCategory}. Source: PHP/Blade. Files detected: navbar.blade.php, breadcrumb.blade.php, widget-area.blade.php.`;
+          const promptContext = contextData 
+            ? `Create a template for: ${JSON.stringify(contextData)}` 
+            : `Theme Name: ${derivedName}. Category: ${derivedCategory}. Source: PHP/Blade. Files detected: index.php, about.php, services.php, contact.php, menu.php (if restaurant), portfolio.php (if agency).`;
 
-          addLog(uploadId, 'ai_worker', 'processing', 'Synthesizing React components into static preview...');
+          addLog(uploadId, 'ai_worker', 'processing', 'Synthesizing multi-page structure into master preview...');
           
           const htmlResponse = await ai.models.generateContent({
               model: 'gemini-3-pro-preview',
-              contents: `You are an Expert Senior Frontend Engineer & UI/UX Designer specialized in migrating legacy systems to modern stacks.
-              Your task is to convert a PHP/Blade theme structure into a single, production-ready HTML5 landing page using Tailwind CSS via CDN.
+              contents: `You are a Senior Frontend Architect. Convert a multi-page PHP/Blade theme into a high-fidelity, single-file HTML5 preview that represents the entire site structure using Tailwind CSS.
 
               CONTEXT:
               ${promptContext}
 
-              CORE OBJECTIVE:
-              Create a visually stunning, responsive, and interactive landing page that feels like a premium SaaS or modern business site. It must look significantly better than the original legacy theme.
+              CRITICAL REQUIREMENTS:
 
-              STRICT DESIGN SYSTEM & REQUIREMENTS:
+              1. **Multi-Page Simulation**:
+                 - The input theme has multiple pages (Home, About, Services, Contact, etc.).
+                 - You must generate a **Master Landing Page** that acts as a comprehensive preview of the whole site.
+                 - **Navigation**: Build a fully responsive, sticky Navbar. It MUST include links for every detected page type (e.g., "Home", "About", "Menu", "Services", "Contact").
+                 - **Page Sections**: Instead of just a hero, create distinct, full-height sections for each "page" found in the structure (e.g., an "About Us" section, a "Services" grid, a "Contact" form). Use smooth scroll IDs (e.g., #about, #services).
 
-              1. **Visual Language (Modern & Polished)**:
-                 - **Typography**: Use 'Inter' or 'Plus Jakarta Sans'. Headings must be bold and tight (tracking-tight).
-                 - **Spacing**: Use ample whitespace (p-8, py-20, gap-8). Avoid cramped layouts.
-                 - **Components**: Use "Glassmorphism" where appropriate (bg-white/70 backdrop-blur-lg).
-                 - **Shadows**: Use soft, diffused shadows (shadow-xl, shadow-primary-500/10).
-                 - **Radius**: Use rounded-2xl or rounded-3xl for cards and buttons.
+              2. **Tailwind CSS Best Practices**:
+                 - Use **ONLY** Tailwind utility classes via CDN. Do not use internal <style> blocks for layout.
+                 - **Responsiveness**: Use mobile-first modifiers (e.g., \`grid-cols-1 md:grid-cols-3\`).
+                 - **Interactivity**: Add \`hover:scale-105\`, \`hover:shadow-xl\`, \`transition-all\`, \`duration-300\` to cards and buttons.
+                 - **Modern Design**: Use \`backdrop-blur-md\` for glass headers, \`bg-gradient-to-r\` for hero backgrounds, and \`rounded-2xl\` for cards.
 
-              2. **Component Mapping (PHP -> Modern UI)**:
-                 - **'navbar.blade.php'** -> **<header>**: Fixed/Sticky top, transparent-to-white on scroll style. Must have a logo, navigation links, and a CTA button.
-                 - **'breadcrumb.blade.php'** -> **Hero Section**: This is the most important section. Use a full-width background image with overlay, or a split layout with a large 3D/Illustration. Large H1, subtext, and two buttons (Primary & Ghost).
-                 - **'widget-area.blade.php'** -> **Footer**: 4-column layout. Brand column, Links column, Resources column, Newsletter column.
+              3. **Component Structure**:
+                 - Comment your code clearly: \`<!-- Navbar Component -->\`, \`<!-- Hero Component -->\`.
+                 - Ensure semantic HTML: \`<header>\`, \`<nav>\`, \`<main>\`, \`<section>\`, \`<footer>\`.
 
-              3. **Industry-Specific Intelligence**:
-                 - If **Restaurant**: Include a "Popular Dishes" grid with food images and price tags. Add a "Book Table" sticky button.
-                 - If **Travel**: Include "Featured Destinations" cards with hover-zoom effects on images.
-                 - If **E-commerce**: Include a "Trending Products" carousel/grid with "Add to Cart" buttons.
-                 - If **Agency**: Include a "Our Work" portfolio grid and "Client Logos" strip.
+              4. **Industry Specifics**:
+                 - **Restaurant**: Menu grid with prices, "Book Table" sticky CTA.
+                 - **Agency**: Portfolio grid with hover overlays, Client logo strip.
+                 - **Travel**: Destination cards with image aspect ratios, Itinerary timeline.
 
-              4. **Technical & Accessibility**:
-                 - **Responsive**: Mobile-first approach. Use 'md:flex-row', 'lg:grid-cols-3'.
-                 - **Images**: Use consistent aspect ratios. Use Unsplash source URLs with relevant keywords (e.g. 'source.unsplash.com/random/800x600?nature,travel').
-                 - **Icons**: Use simple inline SVGs for critical icons (Menu, Arrow, Star).
-                 - **Framework**: Tailwind CSS via CDN is MANDATORY. <script src="https://cdn.tailwindcss.com"></script>.
+              5. **Assets**:
+                 - Use high-quality Unsplash source URLs: \`https://images.unsplash.com/photo-...\` or \`source.unsplash.com/random\`.
+                 - Include FontAwesome or Lucide icons (via SVG) for UI elements.
 
-              5. **Output Format**:
-                 - Return ONLY the raw HTML string starting with <!DOCTYPE html>.
-                 - Do NOT include markdown fences like \`\`\`html.
-                 - Do NOT include explanations.
+              OUTPUT FORMAT:
+              - Return ONLY the raw HTML string starting with \`<!DOCTYPE html>\`.
+              - Include \`<script src="https://cdn.tailwindcss.com"></script>\` in the head.
+              - Do NOT use markdown fences.
 
               THINKING PROCESS:
-              1. Analyze the requested Theme Name & Category.
-              2. Determine the color palette (Primary, Secondary, Background).
-              3. Draft the Hero section structure (Center vs Split).
-              4. Plan the Feature/Content sections based on the category.
-              5. Write the code, ensuring every class is a valid Tailwind utility.`,
+              1. Analyze the category (${derivedCategory}).
+              2. Map the "files" (about.php, etc.) to specific sections on the page.
+              3. Design the color palette based on the industry (e.g., Earthy for Travel, Sleek/Dark for Agency).
+              4. Write the HTML, strictly enforcing Tailwind classes for all styling.`,
               config: {
                   thinkingConfig: { thinkingBudget: 32768 }
               }
@@ -201,7 +207,7 @@ export const TemplateManager: React.FC = () => {
           }
 
           // Construct a valid URL structure
-          const slug = demoContext?.slug || derivedName.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+          const slug = contextData?.slug || derivedName.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
           const localPreviewUrl = `${window.location.origin}/#/preview/${slug}`;
 
           setFormData(prev => ({
@@ -246,9 +252,9 @@ export const TemplateManager: React.FC = () => {
       setPipelineLogs(prev => [log, ...prev]);
   };
 
-  const handleFileUpload = async (e: React.FormEvent, demoData?: any) => {
+  const handleFileUpload = async (e: React.FormEvent, contextData?: any) => {
       if (e) e.preventDefault();
-      if (!uploadFile && !demoData) return;
+      if (!uploadFile && !contextData) return;
       
       setIsStarting(true);
       let uploadId = '';
@@ -270,52 +276,66 @@ export const TemplateManager: React.FC = () => {
       setTimeout(() => {
           setIsStarting(false);
           setView('processing');
-          runSimulation(uploadId, false, demoData);
+          runSimulation(uploadId, false, contextData);
       }, 500); 
   };
 
   const handlePublish = async () => {
       if(!activeUploadId) return;
+      setIsPublishing(true);
       
-      const slug = formData.slug || formData.name.toLowerCase().replace(/ /g, '-');
-      
-      // Ensure we have content. If not, use fallback.
-      let finalHtml = previewHtmlContent;
-      if (!finalHtml || finalHtml.length < 50) {
-          finalHtml = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex items-center justify-center h-screen"><div class="text-center"><h1 class="text-4xl font-bold mb-4">Template Preview</h1><p class="text-gray-600">Content for ${formData.name} is being processed.</p></div></body></html>`;
-      }
+      try {
+        const slug = formData.slug || formData.name.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '');
+        
+        // Ensure we have content. If not, use fallback.
+        let finalHtml = previewHtmlContent;
+        if (!finalHtml || finalHtml.length < 50) {
+            finalHtml = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head><body class="bg-gray-100 flex items-center justify-center h-screen"><div class="text-center"><h1 class="text-4xl font-bold mb-4">Template Preview</h1><p class="text-gray-600">Content for ${formData.name} is being processed.</p></div></body></html>`;
+        }
 
-      // Store the generated HTML in the components_list JSON field
-      const componentsListPayload = {
-          preview_html: finalHtml,
-          generated_at: new Date().toISOString()
-      };
+        // Store the generated HTML in the components_list JSON field
+        const componentsListPayload = {
+            preview_html: finalHtml,
+            generated_at: new Date().toISOString()
+        };
 
-      const { error } = await supabase.from('templates').insert({
-          name: formData.name,
-          slug: slug,
-          description: formData.description,
-          category: formData.category,
-          status: 'published',
-          image_url: demoContext?.image_url || 'https://picsum.photos/800/600',
-          preview_url: formData.preview_url,
-          current_version: '1.0.0',
-          installs_count: 0,
-          components_list: componentsListPayload
-      });
+        // Ensure preview URL is set
+        let finalPreviewUrl = formData.preview_url;
+        if (!finalPreviewUrl || finalPreviewUrl.trim() === '') {
+             finalPreviewUrl = `${window.location.origin}/#/preview/${slug}`;
+        }
 
-      if(error) {
-          alert('Publish failed: ' + error.message);
-      } else {
-          alert('Template published successfully!');
-          setView('list');
-          fetchTemplates();
-          setPipelineLogs([]);
-          setUploadFile(null);
-          setAiAnalysis(null);
-          setPreviewHtml('');
-          setPreviewHtmlContent('');
-          setFormData({ name: '', slug: '', category: 'General', description: '', preview_url: '' });
+        const { error } = await supabase.from('templates').insert({
+            name: formData.name,
+            slug: slug,
+            description: formData.description,
+            category: formData.category,
+            status: 'published',
+            image_url: demoContext?.image_url || 'https://picsum.photos/800/600',
+            preview_url: finalPreviewUrl,
+            current_version: '1.0.0',
+            installs_count: 0,
+            components_list: componentsListPayload
+        });
+
+        if(error) {
+            alert('Publish failed: ' + error.message);
+        } else {
+            alert('Template published successfully!');
+            setView('list');
+            fetchTemplates();
+            // Reset
+            setPipelineLogs([]);
+            setUploadFile(null);
+            setAiAnalysis(null);
+            setPreviewHtml('');
+            setPreviewHtmlContent('');
+            setFormData({ name: '', slug: '', category: 'General', description: '', preview_url: '' });
+        }
+      } catch (e: any) {
+          alert('An unexpected error occurred: ' + e.message);
+      } finally {
+          setIsPublishing(false);
       }
   };
 
@@ -343,15 +363,6 @@ export const TemplateManager: React.FC = () => {
       const blob = new Blob([previewHtml], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
-  };
-
-  // Demo Data for Quick Add
-  const demoContext = {
-      name: 'Kathmandu Delight',
-      slug: 'kathmandu-delight',
-      category: 'Restaurant',
-      description: 'A vibrant template for Nepali cuisine restaurants.',
-      image_url: 'https://picsum.photos/600/400?random=10'
   };
 
   // --- Views ---
@@ -444,7 +455,7 @@ export const TemplateManager: React.FC = () => {
                   <h1 className="text-2xl font-bold text-white">Review Template</h1>
                   <div className="flex gap-3">
                       <Button variant="outline" onClick={() => setView('processing')}>Back</Button>
-                      <Button onClick={handlePublish} className="bg-green-600 hover:bg-green-700 text-white border-0">
+                      <Button onClick={handlePublish} className="bg-green-600 hover:bg-green-700 text-white border-0" isLoading={isPublishing}>
                           <Save className="w-4 h-4 mr-2" /> Publish to Marketplace
                       </Button>
                   </div>
